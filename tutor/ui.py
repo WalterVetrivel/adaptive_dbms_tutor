@@ -5,7 +5,7 @@ import time
 
 import streamlit as st
 
-from . import clock, config, item_bank, learner_model, misconception_tracker, sql_sandbox, students
+from . import calibration, clock, config, item_bank, learner_model, misconception_tracker, sql_sandbox, students
 from .agents.analyst import make_analyst
 from .agents.explainer import Explanation, explain
 from .db import init_db
@@ -54,6 +54,18 @@ def sidebar() -> str:
         st.divider()
         off = clock.offset_days(conn)
         st.caption(f"🕒 {clock.now(conn):%d %b %Y}" + (f" (demo clock +{off:g} days)" if off else ""))
+        with st.popover("⏩ Demo clock"):
+            st.caption("Skip ahead to show spaced repetition.")
+            c1, c2, c3 = st.columns(3)
+            for col, days in zip((c1, c2, c3), (1, 3, 7)):
+                if col.button(f"+{days}d", key=f"adv{days}"):
+                    clock.advance(conn, days)
+                    st.session_state.pop("practice", None)
+                    st.rerun()
+            if off and st.button("Reset to today"):
+                clock.reset(conn)
+                st.session_state.pop("practice", None)
+                st.rerun()
         if config.OFFLINE_MODE:
             st.caption("⚙️ Offline mode: rule-based diagnosis")
         else:
@@ -83,8 +95,21 @@ def _schema_help():
 def question_card(item: Item, graph: ConceptGraph, key: str) -> tuple[str, str, bool]:
     """Render a question. Returns (answer, reasoning, submitted)."""
     c = graph.concepts[item.concept_id]
-    st.caption(f"Unit {c.unit} · **{c.name}** · {item.difficulty_band} · {item.type.upper()}"
-               + (" · ✅ verified" if item.verified else ""))
+    conn = services()[0]
+    elo = conn.execute("SELECT elo, n_responses FROM items WHERE id=?", (item.id,)).fetchone()
+    sid = st.session_state.get("student_id", "")
+    p = calibration.expected(calibration.student_elo(conn, sid, item.concept_id), elo["elo"]) if elo else None
+    badges = [f"Unit {c.unit} · **{c.name}**", item.type.upper(), f"{item.difficulty_band}"]
+    if elo:
+        badges.append(f"difficulty {elo['elo']:.0f} Elo ({elo['n_responses']} responses)")
+    if p is not None:
+        badges.append(f"predicted success {p:.0%}")
+    if item.verified:
+        badges.append("✅ verified" + (" by execution" if item.type == "sql" else
+                                       " by algorithm" if item.type in ("fd", "schedule") else ""))
+    if item.source == "generated":
+        badges.append("✨ AI-generated")
+    st.caption(" · ".join(badges), help=item.verification_note or None)
     st.markdown(f"#### {item.stem}")
     started = st.session_state.setdefault(f"{key}_started", time.time())
     if item.type == "sql":

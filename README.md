@@ -51,7 +51,8 @@ tutor/                 core package
   clock.py · students.py
   agents/analyst.py    Misconception Analyst agent (reads reasoning + SQL error/row diff; keeps strong rule hits)
   agents/explainer.py  Explainer agent (≤80 words, notes-grounded, contrast question; offline fallback)
-  ui.py                shared Streamlit components
+  practice.py          practice session: queue → items, on-demand generation, streak
+  ui.py                shared Streamlit components (incl. demo clock control)
 pages/                 1 Diagnostic · 2 Practice · 3 Progress
 content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
 scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py
@@ -67,7 +68,7 @@ tests/                 pytest suite
 | 2 | Verified item bank (SQL sandbox, FD tools, generator) | ✅ |
 | 3 | Core logic (BKT, Elo, FSRS, selector, grader) | ✅ |
 | 4 | Student UI + misconception/explainer agents | ✅ |
-| 5 | Practice queue + spaced repetition | |
+| 5 | Practice queue + spaced repetition | ✅ |
 | 6 | Teacher dashboard + class simulator | |
 | 7 | Polish, fallbacks, deploy | |
 
