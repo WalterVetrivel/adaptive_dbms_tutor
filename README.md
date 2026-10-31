@@ -40,6 +40,15 @@ tutor/                 core package
   verifier.py          code-based verification for every item type
   item_bank.py         load/save/query items
   agents/generator.py  Question Generator agent (generate → verify → MCQ cross-check)
+  learner_model.py     BKT mastery per concept + difficulty/reasoning modulation + graph propagation
+  calibration.py       Elo for item difficulty and student ability
+  scheduler.py         FSRS spaced repetition (one card per student × concept)
+  selector.py          adaptive diagnostic + daily practice queue + 70%-success item picking
+  grader.py            deterministic grading for MCQ / SQL / FD / schedule items
+  rules.py             rule-based misconception detection (MCQ distractors, SQL patterns)
+  misconception_tracker.py  suspected → active → resolved per student
+  orchestrator.py      on-answer pipeline tying it all together
+  clock.py · students.py
 content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
 scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py
 docs/                  plan, SRS, architecture, build plan, concept map
@@ -52,7 +61,7 @@ tests/                 pytest suite
 |---|---|---|
 | 1 | Skeleton, Groq client, schema, content, sample DB, notes index | ✅ |
 | 2 | Verified item bank (SQL sandbox, FD tools, generator) | ✅ |
-| 3 | Core logic (BKT, Elo, FSRS, selector, grader) | |
+| 3 | Core logic (BKT, Elo, FSRS, selector, grader) | ✅ |
 | 4 | Student UI + misconception/explainer agents | |
 | 5 | Practice queue + spaced repetition | |
 | 6 | Teacher dashboard + class simulator | |
