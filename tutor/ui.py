@@ -16,17 +16,14 @@ from .retrieval import NotesIndex, get_index
 from .schemas import Item
 from .viz import to_dot
 
-DEMO_STUDENT = ("Riya", "riya")
+from .bootstrap import DEMO_STUDENT, ensure_all
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Setting up QueryMind (first run builds the demo class)…")
 def services():
     conn = init_db()
     graph = get_graph()
-    if not item_bank.counts(conn):
-        item_bank.load_all(conn, graph, [p for p in (config.CONTENT_DIR / "seed_items.yaml", config.ITEMS_PATH)
-                                         if p.exists()])
-    students.create(conn, DEMO_STUDENT[0], student_id=DEMO_STUDENT[1])
+    ensure_all(conn, graph)
     llm = None if config.OFFLINE_MODE else LLM(conn)
     return conn, graph, get_index(), llm
 
