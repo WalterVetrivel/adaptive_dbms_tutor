@@ -18,14 +18,14 @@ python scripts/index_notes.py       # data/notes_index.json: BM25 index over the
 python scripts/load_bank.py         # verify + load the 56 seed questions
 python scripts/generate_bank.py     # optional, needs GROQ_API_KEY: generate more verified questions
 
-streamlit run app.py
+streamlit run Home.py
 python -m pytest -q
 ```
 
 ## Layout
 
 ```
-app.py                 Streamlit entry point
+Home.py                Streamlit entry point (home page)
 tutor/                 core package
   config.py            settings from .env
   db.py                SQLite schema (students, items, responses, mastery, FSRS cards, LLM cache)
@@ -49,6 +49,10 @@ tutor/                 core package
   misconception_tracker.py  suspected → active → resolved per student
   orchestrator.py      on-answer pipeline tying it all together
   clock.py · students.py
+  agents/analyst.py    Misconception Analyst agent (reads reasoning + SQL error/row diff; keeps strong rule hits)
+  agents/explainer.py  Explainer agent (≤80 words, notes-grounded, contrast question; offline fallback)
+  ui.py                shared Streamlit components
+pages/                 1 Diagnostic · 2 Practice · 3 Progress
 content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
 scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py
 docs/                  plan, SRS, architecture, build plan, concept map
@@ -62,7 +66,7 @@ tests/                 pytest suite
 | 1 | Skeleton, Groq client, schema, content, sample DB, notes index | ✅ |
 | 2 | Verified item bank (SQL sandbox, FD tools, generator) | ✅ |
 | 3 | Core logic (BKT, Elo, FSRS, selector, grader) | ✅ |
-| 4 | Student UI + misconception/explainer agents | |
+| 4 | Student UI + misconception/explainer agents | ✅ |
 | 5 | Practice queue + spaced repetition | |
 | 6 | Teacher dashboard + class simulator | |
 | 7 | Polish, fallbacks, deploy | |

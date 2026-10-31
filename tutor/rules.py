@@ -9,7 +9,7 @@ from .schemas import Item
 
 def from_mcq(item: Item, chosen: str) -> list[tuple[str, float]]:
     mc = item.misconception_map.get(chosen.strip().upper()[:1])
-    return [(mc, 0.8)] if mc else []
+    return [(mc, 0.6)] if mc else []   # one distractor pick = suspected; two = active
 
 
 _SQL_RULES: list[tuple[str, str, float]] = [
