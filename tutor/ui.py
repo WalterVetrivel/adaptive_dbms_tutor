@@ -236,3 +236,51 @@ def study_plan(student_id: str, limit: int | None = None):
                     f"<span style='opacity:0.7;font-size:0.9em'>{s.reason}</span>", unsafe_allow_html=True)
     if limit and len(steps) > limit:
         st.caption(f"…and {len(steps) - limit} more")
+
+
+TOPIC_PAGE = "pages/5_📚_Topics.py"
+
+
+def _on_map_click(key: str):
+    ev = st.session_state.get(key) or {}
+    try:
+        pts = ev["selection"]["points"]
+    except (KeyError, TypeError):
+        pts = []
+    for p in pts:
+        cid = p.get("customdata")
+        if isinstance(cid, list):
+            cid = cid[0]
+        if cid:
+            st.session_state["goto_topic"] = cid
+            return
+
+
+def concept_map(student_id: str, key: str = "map", highlight: set[str] | None = None):
+    """Clickable, mastery-coloured concept map, one unit at a time. Clicking a topic opens its page."""
+    from . import topics
+
+    conn, graph, _, _ = services()
+    states = topics.states(conn, graph, student_id)
+    default = st.session_state.get(f"{key}_unit") or next(
+        (graph.concepts[c].unit for c in (highlight or [])), 1)
+    unit = st.segmented_control("Unit", options=list(graph.units), default=default, key=f"{key}_unit",
+                                format_func=lambda u: f"Unit {u}", label_visibility="collapsed") or default
+    done = sum(states[c.id].status == "mastered" for c in graph.by_unit(unit))
+    st.caption(f"**Unit {unit}: {graph.units[unit]}** · {done}/{len(graph.by_unit(unit))} topics mastered · "
+               "click a topic to open it")
+    nonce = st.session_state.setdefault(f"{key}_nonce", 0)
+    chart_key = f"{key}_chart_{unit}_{nonce}"
+    st.plotly_chart(topics.map_figure(graph, unit, states, highlight), key=chart_key,
+                    on_select=lambda: _on_map_click(chart_key), selection_mode="points",
+                    config={"displayModeBar": False})
+    st.caption("🟥 < 40%  🟨 40–70%  🟩 ≥ 70%  ⬜ not assessed yet · dark border = core exam topic")
+    if cid := st.session_state.pop("goto_topic", None):
+        st.session_state[f"{key}_nonce"] = nonce + 1     # fresh chart (no lingering selection) on return
+        st.switch_page(TOPIC_PAGE, query_params={"topic": cid})
+    with st.expander(f"All Unit {unit} topics as a list"):
+        for c in graph.by_unit(unit):
+            s = states[c.id]
+            pct = f" · {s.mastery:.0%}" if s.mastery is not None else ""
+            st.page_link(TOPIC_PAGE, label=f"{topics.STATUS_LABEL[s.status]} · {c.name}{pct}",
+                         query_params={"topic": c.id})

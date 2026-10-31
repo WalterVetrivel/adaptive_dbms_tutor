@@ -42,8 +42,8 @@ def show_results():
         for col, (u, title) in zip(cols, graph.units.items()):
             ok, asked = scores.get(u, (0, 0))
             label = "💪 Strong" if asked and ok == asked else ("🙂 Getting there" if ok else "🎯 Focus here")
-            col.metric(f"Unit {u}", f"{ok}/{asked}" if asked else "–", label, delta_color="off",
-                       help=title)
+            col.metric(f"Unit {u}", f"{ok}/{asked}" if asked else "–", help=title)
+            col.caption(label)
     st.markdown("#### 📋 Your study plan")
     st.caption("Work through these in order: foundations come first. Each topic ticks off once you reach 70% "
                "mastery. Today's practice pulls from this plan automatically.")
@@ -94,7 +94,10 @@ with left:
 
 with right:
     st.markdown("#### Your concept map")
-    current = None
     if O is not None and O["plan"] is None:
         current = {item_bank.get(conn, O["item_ids"][O["pos"]]).concept_id}
-    ui.mastery_map(graph, sid, highlight=current, compact=current is not None)
+        ui.mastery_map(graph, sid, highlight=current, compact=True)
+    else:
+        ui.mastery_map(graph, sid)
+        st.page_link("Home.py", label="Open the interactive map on your dashboard: click any topic to study it",
+                     icon="🗺️")
