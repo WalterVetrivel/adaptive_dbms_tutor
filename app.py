@@ -21,11 +21,14 @@ graph = get_graph()
 st.title("🗄️ QueryMind")
 st.caption("Adaptive exam-prep tutor for BE23CS405 Database Management System")
 
-c1, c2, c3, c4 = st.columns(4)
+from tutor import item_bank
+
+c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Concepts", len(graph.concepts))
 c2.metric("Demo-core concepts", len(graph.core_ids()))
 c3.metric("Misconceptions", len(graph.misconceptions))
 c4.metric("Notes chunks indexed", len(get_index()))
+c5.metric("Verified questions", sum(sum(b.values()) for b in item_bank.counts(conn).values()))
 
 if config.OFFLINE_MODE:
     st.info("Running in **offline mode** (no `GROQ_API_KEY`): rule-based fallbacks only.")
