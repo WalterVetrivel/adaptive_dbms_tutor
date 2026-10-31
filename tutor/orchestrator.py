@@ -53,7 +53,7 @@ def rule_diagnosis(item: Item, answer: str, result: GradeResult) -> Diagnosis:
         etype = "conceptual" if hits else ("syntax" if result.sql_error else "")
         return Diagnosis(hits, etype, "Matched a known wrong SQL pattern" if hits else "", source="rule")
     if item.target_misconception:
-        return Diagnosis([(item.target_misconception, 0.5)], "conceptual",
+        return Diagnosis([(item.target_misconception, 0.4)], "conceptual",
                          "Wrong answer on an item built to expose this misconception", source="rule")
     return Diagnosis()
 
@@ -61,8 +61,8 @@ def rule_diagnosis(item: Item, answer: str, result: GradeResult) -> Diagnosis:
 def submit_answer(conn: sqlite3.Connection, graph: ConceptGraph, student_id: str, item: Item, answer: str,
                   reasoning: str = "", mode: str = "practice", time_ms: int | None = None,
                   analyst: Analyst | None = None, used_hint: bool = False,
-                  on_error: Callable[[Exception], None] | None = None) -> AnswerOutcome:
-    now = clock.now(conn)
+                  on_error: Callable[[Exception], None] | None = None, now=None) -> AnswerOutcome:
+    now = now or clock.now(conn)
     result = grade(item, answer)
     cur = conn.execute(
         "INSERT INTO responses(student_id, item_id, mode, answer, reasoning, correct, sql_error, time_ms, created_at)"

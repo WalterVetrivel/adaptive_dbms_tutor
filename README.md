@@ -17,6 +17,7 @@ python scripts/init_db.py           # data/app.db: app data
 python scripts/index_notes.py       # data/notes_index.json: BM25 index over the notes
 python scripts/load_bank.py         # verify + load the 56 seed questions
 python scripts/generate_bank.py     # optional, needs GROQ_API_KEY: generate more verified questions
+python scripts/simulate_class.py    # demo class: 25 persona-driven students, ~1,500 answers
 
 streamlit run Home.py
 python -m pytest -q
@@ -51,11 +52,14 @@ tutor/                 core package
   clock.py · students.py
   agents/analyst.py    Misconception Analyst agent (reads reasoning + SQL error/row diff; keeps strong rule hits)
   agents/explainer.py  Explainer agent (≤80 words, notes-grounded, contrast question; offline fallback)
+  analytics.py         class aggregates (heatmap matrix, gaps, misconception stats, at-risk students)
+  simulation.py        persona-driven simulated students answering through the real pipeline
+  agents/insights.py   Class Insights agent ('what to re-teach' brief; cached daily; offline fallback)
   practice.py          practice session: queue → items, on-demand generation, streak
   ui.py                shared Streamlit components (incl. demo clock control)
-pages/                 1 Diagnostic · 2 Practice · 3 Progress
+pages/                 1 Diagnostic · 2 Practice · 3 Progress · 4 Teacher
 content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
-scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py
+scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py · simulate_class.py
 docs/                  plan, SRS, architecture, build plan, concept map
 tests/                 pytest suite
 ```
@@ -69,7 +73,7 @@ tests/                 pytest suite
 | 3 | Core logic (BKT, Elo, FSRS, selector, grader) | ✅ |
 | 4 | Student UI + misconception/explainer agents | ✅ |
 | 5 | Practice queue + spaced repetition | ✅ |
-| 6 | Teacher dashboard + class simulator | |
+| 6 | Teacher dashboard + class simulator | ✅ |
 | 7 | Polish, fallbacks, deploy | |
 
 See [docs/](docs/) for the SRS and architecture.
