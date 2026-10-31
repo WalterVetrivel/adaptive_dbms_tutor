@@ -13,3 +13,13 @@ textbooks/
 syllabus/
 question_banks/
 data/notes_index.json
+# other local materials (never commit)
+/*.png
+/*.jpg
+/*.jpeg
+/*.pdf
+*.docx
+*.pptx
+/claude.md
+_local_backup/
+references/
