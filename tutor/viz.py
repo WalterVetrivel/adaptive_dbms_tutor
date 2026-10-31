@@ -15,11 +15,12 @@ def mastery_colour(p: float | None) -> str:
 
 
 def to_dot(graph: ConceptGraph, mastery: dict[str, float] | None = None, units: list[int] | None = None,
-           core_only: bool = False) -> str:
+           core_only: bool = False, highlight: set[str] | None = None, rankdir: str = "LR") -> str:
     mastery = mastery or {}
+    highlight = highlight or set()
     keep = {c.id for c in graph.concepts.values()
             if (units is None or c.unit in units) and (not core_only or c.demo_core)}
-    lines = ["digraph G {", "  rankdir=LR; nodesep=0.25; ranksep=0.5;",
+    lines = ["digraph G {", f"  rankdir={rankdir}; nodesep=0.25; ranksep=0.4;",
              '  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10];',
              '  edge [color="#9ca3af", arrowsize=0.6];']
     for u, title in graph.units.items():
@@ -31,8 +32,9 @@ def to_dot(graph: ConceptGraph, mastery: dict[str, float] | None = None, units: 
         for c in members:
             p = mastery.get(c.id)
             label = c.name if p is None else f"{c.name}\\n{p:.0%}"
-            pen = "2" if c.demo_core else "1"
-            lines.append(f'    "{c.id}" [label="{label}", fillcolor="{mastery_colour(p)}", penwidth={pen}];')
+            pen = "3" if c.id in highlight else ("2" if c.demo_core else "1")
+            colour = ', color="#2563eb"' if c.id in highlight else ""
+            lines.append(f'    "{c.id}" [label="{label}", fillcolor="{mastery_colour(p)}", penwidth={pen}{colour}];')
         lines.append("  }")
     for a, b in graph.g.edges():
         if a in keep and b in keep:
