@@ -15,6 +15,8 @@ python scripts/build_sample_db.py   # data/sample.db: teaching database for SQL 
 python scripts/init_db.py           # data/app.db: app data
 # copy the unit notes PDFs into notes/, then:
 python scripts/index_notes.py       # data/notes_index.json: BM25 index over the notes
+python scripts/load_bank.py         # verify + load the 56 seed questions
+python scripts/generate_bank.py     # optional, needs GROQ_API_KEY: generate more verified questions
 
 streamlit run app.py
 python -m pytest -q
@@ -31,8 +33,15 @@ tutor/                 core package
   graph.py             concept graph + misconception library loader (validated DAG)
   retrieval.py         BM25 search over the course notes
   viz.py               Graphviz concept map coloured by mastery
-content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44)
-scripts/               build_sample_db.py · init_db.py · index_notes.py
+  schemas.py           Item model
+  sql_sandbox.py       read-only SQL runner, result comparison, SQL item verification
+  fd_tools.py          closure, candidate keys, normal forms, lossless/preserving checks
+  schedule_tools.py    precedence graph, conflict serializability, recoverable/cascadeless
+  verifier.py          code-based verification for every item type
+  item_bank.py         load/save/query items
+  agents/generator.py  Question Generator agent (generate → verify → MCQ cross-check)
+content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
+scripts/               build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py
 docs/                  plan, SRS, architecture, build plan, concept map
 tests/                 pytest suite
 ```
@@ -42,7 +51,7 @@ tests/                 pytest suite
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Skeleton, Groq client, schema, content, sample DB, notes index | ✅ |
-| 2 | Verified item bank (SQL sandbox, FD tools, generator) | |
+| 2 | Verified item bank (SQL sandbox, FD tools, generator) | ✅ |
 | 3 | Core logic (BKT, Elo, FSRS, selector, grader) | |
 | 4 | Student UI + misconception/explainer agents | |
 | 5 | Practice queue + spaced repetition | |

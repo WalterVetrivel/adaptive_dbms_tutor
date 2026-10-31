@@ -1,0 +1,545 @@
+# Hand-written seed items for the 24 demo-core concepts.
+# Every item is checked by scripts/load_bank.py before it is loaded:
+#   sql      -> reference runs on data/sample.db and differs from each wrong variant
+#   fd       -> answer recomputed by tutor/fd_tools.py
+#   schedule -> answer recomputed by tutor/schedule_tools.py
+#   mcq      -> structure checks (4 options, answer letter, misconception ids exist)
+items:
+# ---------------- Unit 1 ----------------
+- concept_id: keys
+  type: mcq
+  difficulty_band: easy
+  stem: "Which statement about candidate keys is TRUE?"
+  options:
+    - "Every superkey is a candidate key."
+    - "A candidate key is a minimal superkey."
+    - "A relation can have only one candidate key."
+    - "A candidate key may contain NULL values."
+  answer: B
+  misconception_map: {A: MC-KEY-01, C: MC-KEY-02}
+  solution: "A candidate key is a superkey with no redundant attribute. A relation can have several; one becomes the primary key."
+- concept_id: keys
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C, D) with FDs A → B, B → C, C → A. List ALL candidate keys of R."
+  fd_spec: {attributes: ABCD, fds: "A->B, B->C, C->A", ask: candidate_keys}
+  answer: ""
+  solution: "D never appears on a right side, so it is in every key. AD+, BD+ and CD+ are all ABCD, so AD, BD and CD are the candidate keys."
+- concept_id: integrity_constraints
+  type: mcq
+  difficulty_band: easy
+  stem: "employee.dept_id is a foreign key referencing department(dept_id). Which value of employee.dept_id is allowed?"
+  options:
+    - "Only values that exist in department.dept_id, and never NULL."
+    - "Any integer value."
+    - "A value that exists in department.dept_id, or NULL (unless declared NOT NULL)."
+    - "Only the primary key of the employee table."
+  answer: C
+  misconception_map: {A: MC-KEY-03}
+  solution: "Referential integrity requires the value to match a referenced key OR be NULL. In the sample DB, two trainees have dept_id NULL."
+- concept_id: integrity_constraints
+  type: mcq
+  difficulty_band: medium
+  stem: "The entity integrity rule states that:"
+  options:
+    - "Foreign keys must not be NULL."
+    - "No attribute of the primary key can be NULL."
+    - "Every attribute must have a domain."
+    - "A table can have only one UNIQUE constraint."
+  answer: B
+  misconception_map: {A: MC-KEY-03}
+  solution: "Entity integrity: primary key attributes cannot be NULL, so every tuple is identifiable."
+- concept_id: relational_algebra_basic
+  type: mcq
+  difficulty_band: easy
+  stem: "R has 10 tuples, 4 of which have the same value of attribute city. How many tuples can π_city(R) contain at most?"
+  options: ["10", "7", "4", "1"]
+  answer: B
+  misconception_map: {A: MC-RA-01}
+  solution: "Relational algebra works on sets, so projection removes duplicates: the 4 identical cities collapse to 1, giving at most 6 + 1 = 7."
+- concept_id: relational_algebra_basic
+  type: sql
+  difficulty_band: medium
+  stem: "Write SQL equivalent to π_location(department): list each department location once."
+  reference_sql: "SELECT DISTINCT location FROM department"
+  wrong_variants: ["SELECT location FROM department"]
+  answer: ""
+  target_misconception: MC-RA-01
+  solution: "Projection in relational algebra removes duplicates, so the SQL needs DISTINCT."
+- concept_id: relational_algebra_joins
+  type: mcq
+  difficulty_band: medium
+  stem: "employee has 39 rows and department has 6 rows. How many rows does employee × department (Cartesian product) return?"
+  options: ["39", "45", "234", "37"]
+  answer: C
+  misconception_map: {A: MC-RA-02, D: MC-JOIN-02}
+  solution: "A Cartesian product pairs every row with every row: 39 × 6 = 234. A natural/equi join would keep only matching pairs."
+- concept_id: relational_algebra_joins
+  type: mcq
+  difficulty_band: hard
+  stem: "Which relational algebra operation returns all employees, including those with no matching department, padding missing values with NULL?"
+  options: ["Natural join", "Left outer join (employee ⟕ department)", "Cartesian product", "Division"]
+  answer: B
+  misconception_map: {A: MC-RA-02, C: MC-JOIN-02}
+  solution: "A left outer join keeps every tuple of the left relation; unmatched ones get NULLs."
+- concept_id: sql_basic_structure
+  type: sql
+  difficulty_band: easy
+  stem: "List the names of employees whose commission is not recorded (NULL)."
+  reference_sql: "SELECT name FROM employee WHERE commission IS NULL"
+  wrong_variants: ["SELECT name FROM employee WHERE commission = NULL"]
+  answer: ""
+  target_misconception: MC-NULL-01
+  solution: "Comparisons with NULL are UNKNOWN, so `= NULL` matches nothing. Use IS NULL."
+- concept_id: sql_basic_structure
+  type: sql
+  difficulty_band: medium
+  stem: "List name and salary of employees earning more than 90000, highest salary first."
+  reference_sql: "SELECT name, salary FROM employee WHERE salary > 90000 ORDER BY salary DESC"
+  wrong_variants: ["SELECT name, salary FROM employee WHERE salary > 90000 ORDER BY salary"]
+  answer: ""
+  solution: "Filter with WHERE, then ORDER BY salary DESC."
+- concept_id: sql_basic_structure
+  type: mcq
+  difficulty_band: hard
+  stem: "What does `SELECT COUNT(*) FROM employee WHERE commission <> 5000 OR commission = 5000` count?"
+  options:
+    - "All employees."
+    - "Only employees whose commission is not NULL."
+    - "Only employees whose commission is NULL."
+    - "Zero rows."
+  answer: B
+  misconception_map: {A: MC-NULL-01}
+  solution: "For NULL commission both comparisons are UNKNOWN, so those rows are filtered out."
+# ---------------- Unit 2: SQL ----------------
+- concept_id: sql_aggregates
+  type: sql
+  difficulty_band: easy
+  stem: "How many employees have a commission recorded? Return a single number."
+  reference_sql: "SELECT COUNT(commission) FROM employee"
+  wrong_variants: ["SELECT COUNT(*) FROM employee"]
+  answer: ""
+  target_misconception: MC-NULL-02
+  solution: "COUNT(column) skips NULLs; COUNT(*) counts every row."
+- concept_id: sql_aggregates
+  type: sql
+  difficulty_band: medium
+  stem: "Return the average salary of employees in department 10, rounded to 2 decimals."
+  reference_sql: "SELECT ROUND(AVG(salary), 2) FROM employee WHERE dept_id = 10"
+  wrong_variants: ["SELECT ROUND(AVG(salary), 2) FROM employee"]
+  answer: ""
+  solution: "Filter rows with WHERE first, then aggregate."
+- concept_id: sql_aggregates
+  type: mcq
+  difficulty_band: hard
+  stem: "Column commission has values 10, 20, NULL, NULL. What is AVG(commission)?"
+  options: ["7.5", "15", "NULL", "30"]
+  answer: B
+  misconception_map: {A: MC-NULL-02}
+  solution: "Aggregates ignore NULLs: (10 + 20) / 2 = 15."
+- concept_id: sql_group_by_having
+  type: sql
+  difficulty_band: medium
+  stem: "List the dept_id of every department that has more than 5 employees."
+  reference_sql: "SELECT dept_id FROM employee WHERE dept_id IS NOT NULL GROUP BY dept_id HAVING COUNT(*) > 5"
+  wrong_variants: ["SELECT dept_id FROM employee GROUP BY dept_id"]
+  answer: ""
+  target_misconception: MC-AGG-01
+  solution: "WHERE filters rows before grouping, so counts don't exist yet. Filter groups with HAVING COUNT(*) > 5."
+- concept_id: sql_group_by_having
+  type: sql
+  difficulty_band: hard
+  stem: "For each job title held by at least 3 employees, show the job and its maximum salary."
+  reference_sql: "SELECT job, MAX(salary) FROM employee GROUP BY job HAVING COUNT(*) >= 3"
+  wrong_variants: ["SELECT job, MAX(salary) FROM employee GROUP BY job"]
+  answer: ""
+  target_misconception: MC-AGG-01
+  solution: "Group by job, aggregate MAX(salary), and filter groups with HAVING COUNT(*) >= 3."
+- concept_id: sql_group_by_having
+  type: mcq
+  difficulty_band: easy
+  stem: "Why does `SELECT dept_id, name, AVG(salary) FROM employee GROUP BY dept_id` fail in standard SQL?"
+  options:
+    - "AVG cannot be used with GROUP BY."
+    - "name is neither grouped nor aggregated, so it has many values per group."
+    - "GROUP BY must come before FROM."
+    - "dept_id must be aggregated."
+  answer: B
+  misconception_map: {D: MC-AGG-02}
+  solution: "Every non-aggregated column in SELECT must appear in GROUP BY."
+- concept_id: sql_joins
+  type: sql
+  difficulty_band: medium
+  stem: "List every department name with the number of employees in it, including departments with no employees (show 0)."
+  reference_sql: "SELECT d.dept_name, COUNT(e.emp_id) FROM department d LEFT JOIN employee e ON e.dept_id = d.dept_id GROUP BY d.dept_name"
+  wrong_variants:
+    - "SELECT d.dept_name, COUNT(e.emp_id) FROM department d JOIN employee e ON e.dept_id = d.dept_id GROUP BY d.dept_name"
+    - "SELECT d.dept_name, COUNT(*) FROM department d LEFT JOIN employee e ON e.dept_id = d.dept_id GROUP BY d.dept_name"
+  answer: ""
+  target_misconception: MC-NULL-02
+  solution: "An inner join drops Legal (no employees). LEFT JOIN keeps it, and COUNT(e.emp_id) gives 0 because the padded emp_id is NULL."
+- concept_id: sql_joins
+  type: sql
+  difficulty_band: hard
+  stem: "List all departments with the names of their employees earning over 100000. Departments with no such employee must still appear (with NULL name)."
+  reference_sql: "SELECT d.dept_name, e.name FROM department d LEFT JOIN employee e ON e.dept_id = d.dept_id AND e.salary > 100000"
+  wrong_variants: ["SELECT d.dept_name, e.name FROM department d LEFT JOIN employee e ON e.dept_id = d.dept_id WHERE e.salary > 100000"]
+  answer: ""
+  target_misconception: MC-JOIN-01
+  solution: "Putting the salary filter in WHERE removes the NULL-padded rows and turns the LEFT JOIN into an inner join. Put it in the ON clause."
+- concept_id: sql_joins
+  type: mcq
+  difficulty_band: easy
+  stem: "What does `SELECT * FROM employee, department` return?"
+  options:
+    - "Employees with their matching department."
+    - "Every employee paired with every department."
+    - "Only departments that have employees."
+    - "An error: a join condition is required."
+  answer: B
+  misconception_map: {A: MC-JOIN-02, D: MC-JOIN-02}
+  solution: "Listing tables without a join condition gives the Cartesian product."
+- concept_id: sql_subqueries
+  type: sql
+  difficulty_band: medium
+  stem: "List names of employees who earn more than the average salary of all employees."
+  reference_sql: "SELECT name FROM employee WHERE salary > (SELECT AVG(salary) FROM employee)"
+  wrong_variants: ["SELECT name FROM employee WHERE salary > 70000"]
+  answer: ""
+  solution: "Use a scalar subquery: aggregates cannot appear directly in WHERE."
+- concept_id: sql_subqueries
+  type: sql
+  difficulty_band: hard
+  stem: "List the names of departments that have no employees. (Hint: employee.dept_id contains NULLs.)"
+  reference_sql: "SELECT dept_name FROM department d WHERE NOT EXISTS (SELECT 1 FROM employee e WHERE e.dept_id = d.dept_id)"
+  wrong_variants: ["SELECT dept_name FROM department WHERE dept_id NOT IN (SELECT dept_id FROM employee)"]
+  answer: ""
+  target_misconception: MC-NULL-03
+  solution: "NOT IN against a list containing NULL is never TRUE, so it returns nothing. Use NOT EXISTS (or filter NULLs in the subquery)."
+- concept_id: sql_subqueries
+  type: mcq
+  difficulty_band: easy
+  stem: "A correlated subquery is one that:"
+  options:
+    - "Is executed only once for the whole query."
+    - "Refers to a column of the outer query, so it is evaluated per outer row."
+    - "Must use the IN operator."
+    - "Can only appear in the FROM clause."
+  answer: B
+  solution: "Correlated subqueries reference outer columns and are logically re-evaluated for each outer row."
+# ---------------- Unit 2: design ----------------
+- concept_id: functional_dependencies
+  type: mcq
+  difficulty_band: easy
+  stem: "Given AB → C, which of the following is guaranteed to hold?"
+  options: ["A → C", "C → AB", "ABD → C", "B → C"]
+  answer: C
+  misconception_map: {A: MC-FD-02, B: MC-FD-01, D: MC-FD-02}
+  solution: "Augmentation: adding attributes to the left side keeps an FD valid. You can't split the left side or reverse the FD."
+- concept_id: functional_dependencies
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C, D, E) with FDs A → B, B → C, CD → E. Compute the closure (AD)+."
+  fd_spec: {attributes: ABCDE, fds: "A->B, B->C, CD->E", ask: closure, of: AD}
+  answer: ""
+  solution: "AD → B (A→B) → C (B→C) → E (CD→E): (AD)+ = ABCDE."
+- concept_id: closure_candidate_keys
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C, D, E) with FDs A → B, B → C, CD → E. Find all candidate keys."
+  fd_spec: {attributes: ABCDE, fds: "A->B, B->C, CD->E", ask: candidate_keys}
+  answer: ""
+  solution: "A and D never appear on a right side, and (AD)+ = ABCDE, so AD is the only candidate key."
+- concept_id: closure_candidate_keys
+  type: fd
+  difficulty_band: hard
+  stem: "R(A, B, C, D) with FDs AB → C, C → D, D → A. Find all candidate keys."
+  fd_spec: {attributes: ABCD, fds: "AB->C, C->D, D->A", ask: candidate_keys}
+  answer: ""
+  solution: "B is in every key. AB+ = ABCD, CB+ = CBDA, DB+ = DBAC, so AB, BC and BD are candidate keys."
+- concept_id: closure_candidate_keys
+  type: mcq
+  difficulty_band: easy
+  stem: "In R(A, B, C) with A → B and B → C, which set is a superkey but NOT a candidate key?"
+  options: ["A", "AB", "B", "BC"]
+  answer: B
+  misconception_map: {A: MC-KEY-01}
+  solution: "A+ = ABC, so A is a candidate key. AB is also a superkey but not minimal."
+- concept_id: nonloss_decomposition
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C) with FD B → C is decomposed into R1(A, B) and R2(B, C). Is the decomposition lossless? (yes/no)"
+  fd_spec: {attributes: ABC, fds: "B->C", ask: lossless, decomposition: "AB, BC"}
+  answer: ""
+  target_misconception: MC-DEC-01
+  solution: "Common attribute B → C, so B is a key of R2: lossless."
+- concept_id: nonloss_decomposition
+  type: fd
+  difficulty_band: hard
+  stem: "R(A, B, C) with FD B → C is decomposed into R1(A, B) and R2(A, C). Is the decomposition lossless? (yes/no)"
+  fd_spec: {attributes: ABC, fds: "B->C", ask: lossless, decomposition: "AB, AC"}
+  answer: ""
+  target_misconception: MC-DEC-01
+  solution: "The common attribute A is not a superkey of either part (A+ = A), so spurious tuples can appear: lossy."
+- concept_id: nf_1_2
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C, D) with FDs AB → C, B → D. What is the highest normal form of R? (1NF/2NF/3NF/BCNF)"
+  fd_spec: {attributes: ABCD, fds: "AB->C, B->D", ask: normal_form}
+  answer: ""
+  target_misconception: MC-NF-02
+  solution: "Key is AB. B → D is a partial dependency of non-prime D on part of the key, so R is only in 1NF."
+- concept_id: nf_1_2
+  type: mcq
+  difficulty_band: easy
+  stem: "A relation is in 2NF when it is in 1NF and:"
+  options:
+    - "It has no transitive dependencies."
+    - "No non-prime attribute depends on part of a candidate key."
+    - "Every determinant is a superkey."
+    - "It has no multivalued dependencies."
+  answer: B
+  misconception_map: {A: MC-NF-02, C: MC-NF-01}
+  solution: "2NF removes partial dependencies. Transitive dependencies are handled by 3NF; 'every determinant is a key' is BCNF."
+- concept_id: nf_3
+  type: fd
+  difficulty_band: medium
+  stem: "R(A, B, C) with FDs A → B, B → C. What is the highest normal form of R? (1NF/2NF/3NF/BCNF)"
+  fd_spec: {attributes: ABC, fds: "A->B, B->C", ask: normal_form}
+  answer: ""
+  target_misconception: MC-NF-02
+  solution: "Key A is a single attribute, so no partial dependencies (2NF). A → B → C is transitive, so not 3NF."
+- concept_id: nf_3
+  type: fd
+  difficulty_band: hard
+  stem: "R(emp_id, name, dept_id, dept_name) with emp_id → name, dept_id and dept_id → dept_name. Highest normal form? (1NF/2NF/3NF/BCNF)"
+  fd_spec: {attributes: "emp_id, name, dept_id, dept_name", fds: "emp_id -> name, dept_id; dept_id -> dept_name", ask: normal_form}
+  answer: ""
+  solution: "dept_name depends on emp_id transitively via dept_id, so R is in 2NF but not 3NF. Split out Department(dept_id, dept_name)."
+- concept_id: bcnf
+  type: fd
+  difficulty_band: hard
+  stem: "R(A, B, C) with FDs AB → C, C → B. What is the highest normal form of R? (1NF/2NF/3NF/BCNF)"
+  fd_spec: {attributes: ABC, fds: "AB->C, C->B", ask: normal_form}
+  answer: ""
+  target_misconception: MC-NF-01
+  solution: "Keys AB and AC, so every attribute is prime and R is in 3NF. But C → B has a non-superkey determinant, so R is not in BCNF."
+- concept_id: bcnf
+  type: mcq
+  difficulty_band: medium
+  stem: "Which statement about BCNF decomposition is TRUE?"
+  options:
+    - "It is always lossless and always dependency preserving."
+    - "It is always lossless but may not preserve all dependencies."
+    - "BCNF and 3NF decompositions are identical."
+    - "It may be lossy but always preserves dependencies."
+  answer: B
+  misconception_map: {A: MC-NF-03, C: MC-NF-01}
+  solution: "The BCNF algorithm guarantees a lossless join, but a dependency like AB → C may span relations after decomposition."
+# ---------------- Unit 3 ----------------
+- concept_id: schedules
+  type: schedule
+  difficulty_band: medium
+  stem: "Schedule S: w1(A) r2(A) c1 c2. Is S cascadeless? (yes/no)"
+  schedule_spec: {schedule: "w1(A) r2(A) c1 c2", ask: cascadeless}
+  answer: ""
+  target_misconception: MC-TX-04
+  solution: "T2 reads A written by T1 before T1 commits. S is recoverable (T1 commits first) but NOT cascadeless."
+- concept_id: schedules
+  type: schedule
+  difficulty_band: hard
+  stem: "Schedule S: w1(A) r2(A) c2 c1. Is S recoverable? (yes/no)"
+  schedule_spec: {schedule: "w1(A) r2(A) c2 c1", ask: recoverable}
+  answer: ""
+  solution: "T2 read from T1 but committed before T1. If T1 aborts, T2's commit can't be undone: not recoverable."
+- concept_id: schedules
+  type: mcq
+  difficulty_band: easy
+  stem: "Which statement is TRUE?"
+  options:
+    - "Every recoverable schedule is cascadeless."
+    - "Every cascadeless schedule is recoverable."
+    - "Serial schedules can cause cascading rollbacks."
+    - "Recoverability depends only on the order of reads."
+  answer: B
+  misconception_map: {A: MC-TX-04}
+  solution: "Cascadeless (read only committed data) implies recoverable, but not vice versa."
+- concept_id: serializability
+  type: schedule
+  difficulty_band: medium
+  stem: "Schedule S: r1(A) r2(A) w1(A) w2(A). Is S conflict-serializable? (yes/no)"
+  schedule_spec: {schedule: "r1(A) r2(A) w1(A) w2(A)", ask: conflict_serializable}
+  answer: ""
+  solution: "r2(A) before w1(A) gives T2 → T1; r1(A) before w2(A) and w1(A) before w2(A) give T1 → T2. Cycle: not conflict-serializable."
+- concept_id: serializability
+  type: schedule
+  difficulty_band: hard
+  stem: "Schedule S: r1(A) w1(A) r2(A) w2(A) r1(B) w1(B) r2(B) w2(B). Give the equivalent serial order (e.g. T1 -> T2) or say 'not serializable'."
+  schedule_spec: {schedule: "r1(A) w1(A) r2(A) w2(A) r1(B) w1(B) r2(B) w2(B)", ask: serial_order}
+  answer: ""
+  solution: "All conflicts go from T1 to T2, so the precedence graph is acyclic: T1 -> T2."
+- concept_id: serializability
+  type: mcq
+  difficulty_band: medium
+  stem: "Which relationship between schedule classes is correct?"
+  options:
+    - "Every view-serializable schedule is conflict-serializable."
+    - "Every conflict-serializable schedule is view-serializable."
+    - "Conflict and view serializability are equivalent."
+    - "A schedule with blind writes is never serializable."
+  answer: B
+  misconception_map: {A: MC-TX-02, C: MC-TX-02}
+  solution: "Conflict-serializable ⊂ view-serializable. Blind writes allow schedules that are view- but not conflict-serializable."
+- concept_id: two_phase_locking
+  type: mcq
+  difficulty_band: easy
+  stem: "What does basic two-phase locking (2PL) guarantee?"
+  options:
+    - "Freedom from deadlock."
+    - "Conflict serializability."
+    - "Freedom from cascading rollback."
+    - "That transactions never wait."
+  answer: B
+  misconception_map: {A: MC-TX-01}
+  solution: "2PL guarantees conflict serializability. Deadlocks can still happen; strict 2PL is needed to avoid cascading rollbacks."
+- concept_id: two_phase_locking
+  type: mcq
+  difficulty_band: medium
+  stem: "Strict 2PL differs from basic 2PL because it:"
+  options:
+    - "Releases all locks at the end of the growing phase."
+    - "Holds exclusive locks until the transaction commits or aborts."
+    - "Prevents all deadlocks."
+    - "Acquires all locks before the transaction starts."
+  answer: B
+  misconception_map: {C: MC-TX-01}
+  solution: "Strict 2PL keeps X-locks until commit/abort, which prevents cascading rollbacks. Rigorous 2PL holds all locks."
+- concept_id: deadlock
+  type: mcq
+  difficulty_band: medium
+  stem: "Under the wait-die scheme, an OLDER transaction requests a lock held by a YOUNGER one. What happens?"
+  options:
+    - "The older transaction waits."
+    - "The older transaction is rolled back."
+    - "The younger transaction is rolled back (wounded)."
+    - "Both are rolled back."
+  answer: A
+  misconception_map: {C: MC-TX-05}
+  solution: "Wait-die: older waits, younger dies. (In wound-wait, the older would wound the younger.)"
+- concept_id: deadlock
+  type: mcq
+  difficulty_band: hard
+  stem: "T1 holds X(A) and requests X(B); T2 holds X(B) and requests X(A). Both follow 2PL. What is true?"
+  options:
+    - "This cannot happen under 2PL."
+    - "There is a deadlock; the wait-for graph has the cycle T1 → T2 → T1."
+    - "T1 will get B because it started first."
+    - "It is a livelock, not a deadlock."
+  answer: B
+  misconception_map: {A: MC-TX-01}
+  solution: "2PL does not prevent deadlock. Detection finds the cycle in the wait-for graph and aborts a victim."
+- concept_id: isolation_levels
+  type: mcq
+  difficulty_band: medium
+  stem: "Which is the weakest isolation level that prevents non-repeatable reads?"
+  options: ["READ UNCOMMITTED", "READ COMMITTED", "REPEATABLE READ", "SERIALIZABLE"]
+  answer: C
+  misconception_map: {B: MC-ISO-01}
+  solution: "READ COMMITTED prevents dirty reads only. REPEATABLE READ also prevents non-repeatable reads; SERIALIZABLE also prevents phantoms."
+- concept_id: isolation_levels
+  type: mcq
+  difficulty_band: easy
+  stem: "A transaction reads a value written by another transaction that later rolls back. This anomaly is a:"
+  options: ["Dirty read", "Phantom read", "Lost update", "Non-repeatable read"]
+  answer: A
+  solution: "Reading uncommitted data is a dirty read. Only READ UNCOMMITTED allows it."
+# ---------------- Unit 4 ----------------
+- concept_id: ordered_indices
+  type: mcq
+  difficulty_band: easy
+  stem: "Why must a secondary index be dense?"
+  options:
+    - "Because secondary keys are always unique."
+    - "Because the file is not sorted on the secondary key, so every value needs its own entry."
+    - "Because sparse indices are slower to search."
+    - "It need not be: secondary indices are usually sparse."
+  answer: B
+  misconception_map: {D: MC-IDX-02}
+  solution: "A sparse index relies on the file being sorted by the search key; secondary keys aren't."
+- concept_id: ordered_indices
+  type: mcq
+  difficulty_band: medium
+  stem: "Adding an index on employee.salary will definitely:"
+  options:
+    - "Make every query on employee faster."
+    - "Slow down inserts and updates that change salary."
+    - "Sort the employee table by salary on disk."
+    - "Remove duplicate salaries."
+  answer: B
+  misconception_map: {A: MC-IDX-01}
+  solution: "Indexes must be maintained on every write. Reads only benefit when the optimizer can use the index selectively."
+- concept_id: b_plus_tree
+  type: mcq
+  difficulty_band: medium
+  stem: "In a B+ tree, where are the pointers to the actual data records stored?"
+  options:
+    - "In every node."
+    - "Only in the leaf nodes."
+    - "Only in the root."
+    - "In internal nodes only."
+  answer: B
+  misconception_map: {A: MC-IDX-03, D: MC-IDX-03}
+  solution: "Internal nodes guide the search; leaves hold the record pointers and are linked for range scans. (B trees store data pointers in internal nodes too.)"
+- concept_id: b_plus_tree
+  type: mcq
+  difficulty_band: hard
+  stem: "A B+ tree has order n = 4 (max 3 keys per leaf). Inserting into a full leaf causes:"
+  options:
+    - "The key to go into an overflow bucket."
+    - "The leaf to split into two leaves and the first key of the new leaf to be copied up to the parent."
+    - "The whole tree to be rebuilt."
+    - "The key to be rejected."
+  answer: B
+  misconception_map: {A: MC-HASH-01}
+  solution: "B+ trees stay balanced by splitting nodes. Overflow buckets belong to static hashing."
+# ---------------- Unit 5 ----------------
+- concept_id: cap_theorem
+  type: mcq
+  difficulty_band: easy
+  stem: "According to the CAP theorem, during a network partition a distributed database must choose between:"
+  options:
+    - "Consistency and availability."
+    - "Availability and durability."
+    - "Partition tolerance and consistency."
+    - "Nothing: it can provide all three."
+  answer: A
+  misconception_map: {D: MC-CAP-01}
+  solution: "When a partition happens, a system either refuses some requests (CP) or serves possibly stale data (AP)."
+- concept_id: cap_theorem
+  type: mcq
+  difficulty_band: medium
+  stem: "A shopping-cart service keeps accepting writes on both sides of a partition and reconciles later. It is:"
+  options: ["CP", "AP", "CA", "ACID-compliant across partitions"]
+  answer: B
+  misconception_map: {C: MC-CAP-01, D: MC-CAP-01}
+  solution: "It favours availability over immediate consistency during partitions: AP (eventual consistency)."
+- concept_id: nosql_types
+  type: mcq
+  difficulty_band: easy
+  stem: "Which NoSQL type fits a social network's 'friends of friends' query best?"
+  options: ["Key-value store", "Document store", "Column-family store", "Graph database"]
+  answer: D
+  misconception_map: {}
+  solution: "Graph databases store relationships as edges, so multi-hop traversals are natural."
+- concept_id: nosql_types
+  type: mcq
+  difficulty_band: medium
+  stem: "Which statement about NoSQL databases is TRUE?"
+  options:
+    - "They cannot be queried with any query language."
+    - "'NoSQL' means 'not only SQL'; many have flexible schemas and their own query languages."
+    - "They never support transactions."
+    - "They always store data as JSON documents."
+  answer: B
+  misconception_map: {A: MC-NOSQL-01, D: MC-NOSQL-01}
+  solution: "MongoDB, Cassandra (CQL) and Neo4j (Cypher) all have query languages; schemas are flexible, not absent."
