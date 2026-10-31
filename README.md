@@ -22,7 +22,7 @@ Other scripts:
 ```bash
 python scripts/generate_bank.py --per-band 1     # needs GROQ_API_KEY: grow the bank with verified AI questions
 python scripts/simulate_class.py --days 10       # rebuild the simulated class
-python -m pytest -q                              # 49 tests, no API key needed
+python -m pytest -q                              # 61 tests, no API key needed
 ```
 
 ## How it covers the brief
@@ -39,13 +39,14 @@ python -m pytest -q                              # 49 tests, no API key needed
 
 ## Demo script (3 minutes)
 
-1. **Home → Demo controls → Reset demo.** Riya starts fresh.
-2. **🩺 Diagnostic:** answer 4–5 questions. The unit map colours in. Get one wrong and the next question checks its prerequisite.
-3. **The key moment:** on a GROUP BY question, write `... WHERE COUNT(*) > 5 GROUP BY ...` with the reason "WHERE filters the rows I want". You get a SQLite error, the **WHERE-vs-HAVING** misconception, a mastery drop that propagates to *SQL aggregate functions*, a targeted explanation, and an excerpt from the notes.
-4. **🏋️ Practice:** the queue leads with "🧠 Fixing a misconception". Questions show *verified by execution* and *predicted success*.
-5. **Demo clock +3d:** "Reviews due" jumps and 🔁 review items lead the queue.
-6. **👩‍🏫 Teacher:** "WHERE can filter on aggregate results" held by about 8 students in the brief and misconceptions table; heatmap; drill into Bhavya R to see the actual reasoning.
-7. **Trust:** every SQL question is checked by running it, FD and schedule answers are computed by algorithms, everything runs on Groq's free tier, and it all still works if Groq is down.
+1. **Home → Demo controls → Reset demo.** Riya starts fresh and lands on **🧭 Get started**: a 10-question placement check (2 per unit, with *I don't know*). It ends with where she stands per unit and a study plan ordered foundations first.
+2. **Home dashboard:** mastered / in progress / needs work counts, the study plan ticking off at 70%, and a clickable concept map (one unit at a time). Click a topic to open its **📚 topic page**: overview, common mistakes, what it builds on and leads to, and questions to practise it.
+3. **🩺 Diagnostic (optional, longer):** answer 4–5 questions. The unit map colours in. Get one wrong and the next question checks its prerequisite.
+4. **The key moment:** on a GROUP BY question, write `... WHERE COUNT(*) > 5 GROUP BY ...` with the reason "WHERE filters the rows I want". You get a SQLite error, the **WHERE-vs-HAVING** misconception, a mastery drop that propagates to *SQL aggregate functions*, a targeted explanation, and an excerpt from the notes.
+5. **🏋️ Practice:** the queue leads with "🧠 Fixing a misconception". Questions show *verified by execution* and *predicted success*.
+6. **Demo clock +3d:** "Reviews due" jumps and 🔁 review items lead the queue.
+7. **👩‍🏫 Teacher:** "WHERE can filter on aggregate results" held by about 8 students in the brief and misconceptions table; heatmap; drill into Bhavya R to see the actual reasoning.
+8. **Trust:** every SQL question is checked by running it, FD and schedule answers are computed by algorithms, everything runs on Groq's free tier, and it all still works if Groq is down.
 
 ## Deploy (Streamlit Community Cloud, free)
 
@@ -87,8 +88,11 @@ tutor/                 core package
   simulation.py        persona-driven simulated students answering through the real pipeline
   agents/insights.py   Class Insights agent ('what to re-teach' brief; cached daily; offline fallback)
   practice.py          practice session: queue → items, on-demand generation, streak
-  ui.py                shared Streamlit components (incl. demo clock control)
-pages/                 1 Diagnostic · 2 Practice · 3 Progress · 4 Teacher
+  ui.py                shared Streamlit components (incl. demo clock control, clickable concept map)
+  onboarding.py        first-login placement check (2 questions per unit) + personal study plan
+  topics.py            per-topic status (mastered / in progress / needs work) + clickable map layout
+  agents/overview.py   Topic Overview agent (notes-grounded overview, key points, example; offline fallback)
+pages/                 0 Get started · 1 Diagnostic · 2 Practice · 3 Progress · 4 Teacher · 5 Topics
 content/               concept_graph.yaml (63 concepts) · misconceptions.yaml (44) · seed_items.yaml (56) · items.jsonl (generated)
 scripts/               setup.py · build_sample_db.py · init_db.py · index_notes.py · load_bank.py · generate_bank.py · simulate_class.py
 docs/                  plan, SRS, architecture, build plan, concept map

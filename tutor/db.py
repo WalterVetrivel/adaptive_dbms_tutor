@@ -123,6 +123,21 @@ CREATE TABLE IF NOT EXISTS llm_calls (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS onboarding (
+    student_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL CHECK (status IN ('completed','skipped')),
+    unit_scores_json TEXT NOT NULL DEFAULT '{}',   -- {"1": [correct, asked], ...}
+    completed_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS study_plan (
+    student_id TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    concept_id TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    PRIMARY KEY (student_id, concept_id)
+);
+
 CREATE TABLE IF NOT EXISTS app_state (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL

@@ -5,7 +5,8 @@ import time
 
 import streamlit as st
 
-from . import calibration, clock, config, item_bank, learner_model, misconception_tracker, sql_sandbox, students
+from . import (calibration, clock, config, item_bank, learner_model, misconception_tracker, onboarding, sql_sandbox,
+               students)
 from .agents.analyst import make_analyst
 from .agents.explainer import Explanation, explain
 from .db import init_db
@@ -17,6 +18,9 @@ from .schemas import Item
 from .viz import to_dot
 
 from .bootstrap import DEMO_STUDENT, ensure_all
+
+
+GET_STARTED = "pages/0_🧭_Get_started.py"
 
 
 @st.cache_resource(show_spinner="Setting up QueryMind (first run builds the demo class)…")
@@ -41,13 +45,15 @@ def sidebar() -> str:
                            format_func=names.get, label_visibility="collapsed")
         if sid != st.session_state.get("student_id"):
             st.session_state["student_id"] = sid
-            for k in [k for k in st.session_state if k.startswith(("diag", "practice"))]:
+            for k in [k for k in st.session_state if k.startswith(("diag", "practice", "onb"))]:
                 del st.session_state[k]
         with st.popover("➕ New student"):
             name = st.text_input("Name")
             if st.button("Create", disabled=not name.strip()):
                 st.session_state["student_id"] = students.create(conn, name.strip())
-                st.rerun()
+                for k in [k for k in st.session_state if k.startswith(("diag", "practice", "onb"))]:
+                    del st.session_state[k]
+                st.switch_page(GET_STARTED)
         st.divider()
         off = clock.offset_days(conn)
         st.caption(f"🕒 {clock.now(conn):%d %b %Y}" + (f" (demo clock +{off:g} days)" if off else ""))
@@ -142,7 +148,7 @@ def question_card(item: Item, graph: ConceptGraph, key: str) -> tuple[str, str, 
 
 
 def answer(item: Item, student_id: str, answer_text: str, reasoning: str, mode: str,
-           elapsed_ms: int | None) -> tuple[AnswerOutcome, Explanation]:
+           elapsed_ms: int | None, explain_mistakes: bool = True) -> tuple[AnswerOutcome, Explanation | None]:
     conn, graph, notes, llm = services()
     analyst = make_analyst(llm, graph) if llm else None
     errors: list[Exception] = []
@@ -150,7 +156,7 @@ def answer(item: Item, student_id: str, answer_text: str, reasoning: str, mode: 
                             analyst=analyst, on_error=errors.append)
     if errors:
         st.toast("Groq unavailable, used rule-based diagnosis", icon="⚠️")
-    exp = explain(llm, graph, notes, item, answer_text, reasoning, outcome) if (
+    exp = explain(llm, graph, notes, item, answer_text, reasoning, outcome) if explain_mistakes and (
         not outcome.grade.correct or outcome.diagnosis.flawed_reasoning) else None
     return outcome, exp
 
@@ -206,3 +212,75 @@ def active_misconceptions(student_id: str):
         icon = "🔴" if r["status"] == "active" else "🟡"
         st.markdown(f"{icon} **{graph.misconceptions[r['misconception_id']].belief}** "
                     f"· {r['status']} · seen {r['occurrences']}×")
+
+
+def study_plan(student_id: str, limit: int | None = None):
+    """The student's study plan as a checklist, with live mastery. Shows a call to action if there is none."""
+    conn, graph, _, _ = services()
+    steps = onboarding.plan(conn, student_id)
+    if not steps:
+        if onboarding.status(conn, student_id) == "completed":
+            st.caption("Nothing to fix: you aced the placement check. Practice keeps you sharp.")
+        else:
+            st.page_link(GET_STARTED, label="Take the 10-question placement check to get your study plan",
+                         icon="🧭")
+        return
+    done = sum(s.done for s in steps)
+    st.progress(done / len(steps), text=f"{done} of {len(steps)} topics mastered")
+    nxt = next((s for s in steps if not s.done), None)
+    for s in steps[:limit]:
+        c = graph.concepts[s.concept_id]
+        mark = "✅" if s.done else ("▶️" if s is nxt else "⬜")
+        level = f"{s.mastery:.0%}" if s.attempted else "not practised yet"
+        st.markdown(f"{mark} **{c.name}** · Unit {c.unit} · {level}  \n"
+                    f"<span style='opacity:0.7;font-size:0.9em'>{s.reason}</span>", unsafe_allow_html=True)
+    if limit and len(steps) > limit:
+        st.caption(f"…and {len(steps) - limit} more")
+
+
+TOPIC_PAGE = "pages/5_📚_Topics.py"
+
+
+def _on_map_click(key: str):
+    ev = st.session_state.get(key) or {}
+    try:
+        pts = ev["selection"]["points"]
+    except (KeyError, TypeError):
+        pts = []
+    for p in pts:
+        cid = p.get("customdata")
+        if isinstance(cid, list):
+            cid = cid[0]
+        if cid:
+            st.session_state["goto_topic"] = cid
+            return
+
+
+def concept_map(student_id: str, key: str = "map", highlight: set[str] | None = None):
+    """Clickable, mastery-coloured concept map, one unit at a time. Clicking a topic opens its page."""
+    from . import topics
+
+    conn, graph, _, _ = services()
+    states = topics.states(conn, graph, student_id)
+    default = st.session_state.get(f"{key}_unit") or next(
+        (graph.concepts[c].unit for c in (highlight or [])), 1)
+    unit = st.segmented_control("Unit", options=list(graph.units), default=default, key=f"{key}_unit",
+                                format_func=lambda u: f"Unit {u}", label_visibility="collapsed") or default
+    done = sum(states[c.id].status == "mastered" for c in graph.by_unit(unit))
+    st.caption(f"**Unit {unit}: {graph.units[unit]}** · {done}/{len(graph.by_unit(unit))} topics mastered · "
+               "click a topic to open it")
+    nonce = st.session_state.setdefault(f"{key}_nonce", 0)
+    chart_key = f"{key}_chart_{unit}_{nonce}"
+    st.plotly_chart(topics.map_figure(graph, unit, states, highlight), key=chart_key,
+                    on_select=lambda: _on_map_click(chart_key), selection_mode="points",
+                    config={"displayModeBar": False})
+    st.caption("🟥 < 40%  🟨 40–70%  🟩 ≥ 70%  ⬜ not assessed yet · dark border = core exam topic")
+    if cid := st.session_state.pop("goto_topic", None):
+        st.session_state[f"{key}_nonce"] = nonce + 1     # fresh chart (no lingering selection) on return
+        st.switch_page(TOPIC_PAGE, query_params={"topic": cid})
+    with st.expander(f"All Unit {unit} topics as a list"):
+        for c in graph.by_unit(unit):
+            s = states[c.id]
+            pct = f" · {s.mastery:.0%}" if s.mastery is not None else ""
+            st.page_link(TOPIC_PAGE, label=f"{topics.STATUS_LABEL[s.status]} · {c.name}{pct}",
+                         query_params={"topic": c.id})
