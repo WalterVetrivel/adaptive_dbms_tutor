@@ -1,0 +1,1004 @@
+# DBMS concept graph for the adaptive tutor
+# Source: BE23CS405 syllabus (5 units, Bloom levels from the syllabus), unit notes in notes/, question banks in question_banks/.
+# prereqs = edges (prerequisite -> concept). Validated acyclic.
+# demo_core: the ~24 concepts to seed with items first for the 8-hour build.
+# item_types: sql = verified by running on sample DB; fd = verified by closure code;
+#             schedule = verified by precedence-graph / lock simulation code; mcq = LLM cross-check.
+syllabus:
+  code: BE23CS405
+  title: Database Management System
+  regulation: KIOT B.E./B.Tech. Regulations 2023
+  textbooks:
+  - Silberschatz, Korth, Sudarshan – Database System Concepts (McGraw Hill)
+  - Elmasri, Navathe – Fundamentals of Database Systems (Pearson)
+units:
+- id: 1
+  title: Introduction to Relational Database
+- id: 2
+  title: Database Design
+- id: 3
+  title: Transaction Management
+- id: 4
+  title: Implementation Techniques
+- id: 5
+  title: Advanced Topics
+concepts:
+- id: purpose_of_dbms
+  name: Purpose of database systems
+  unit: 1
+  bloom: L2
+  prereqs: []
+  item_types:
+  - mcq
+  demo_core: false
+  description: 'Why DBMS over file systems: redundancy, inconsistency, isolation, integrity, atomicity, concurrency, security
+    problems.'
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Purpose of Database System
+- id: views_of_data
+  name: Views of data and data abstraction
+  unit: 1
+  bloom: L2
+  prereqs:
+  - purpose_of_dbms
+  item_types:
+  - mcq
+  demo_core: false
+  description: Physical, logical and view levels; instances vs schemas; physical and logical data independence.
+  misconceptions:
+  - MC-ARCH-01
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Views of Data
+- id: data_models
+  name: Data models
+  unit: 1
+  bloom: L2
+  prereqs:
+  - views_of_data
+  item_types:
+  - mcq
+  demo_core: false
+  description: Relational, ER, object-based, semi-structured, hierarchical and network models; pros and cons.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Data Models
+- id: db_architecture
+  name: Database system architecture
+  unit: 1
+  bloom: L2
+  prereqs:
+  - views_of_data
+  item_types:
+  - mcq
+  demo_core: false
+  description: Query processor (DDL interpreter, DML compiler, query evaluation engine) and storage manager components.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Database System Architecture
+- id: relational_model
+  name: Relational model
+  unit: 1
+  bloom: L2
+  prereqs:
+  - data_models
+  item_types:
+  - mcq
+  demo_core: false
+  description: Relations, tuples, attributes, domains, degree and cardinality, relation schema vs instance.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Introduction to Relational Databases / Relational Model
+- id: keys
+  name: Keys
+  unit: 1
+  bloom: L3
+  prereqs:
+  - relational_model
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: Super key, candidate key, primary key, alternate key, foreign key; minimality and uniqueness.
+  misconceptions:
+  - MC-KEY-01
+  - MC-KEY-02
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Keys / Domain and Key Constraint
+- id: integrity_constraints
+  name: Integrity constraints
+  unit: 1
+  bloom: L2
+  prereqs:
+  - keys
+  item_types:
+  - mcq
+  - sql
+  demo_core: true
+  description: Domain, key, entity integrity and referential integrity rules; ON DELETE behaviour.
+  misconceptions:
+  - MC-KEY-03
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Integrity Constraints
+- id: relational_algebra_basic
+  name: 'Relational algebra: unary and set operations'
+  unit: 1
+  bloom: L3
+  prereqs:
+  - relational_model
+  item_types:
+  - mcq
+  - sql
+  demo_core: true
+  description: Select (σ), project (π), rename (ρ), union, intersection, set difference, Cartesian product.
+  misconceptions:
+  - MC-RA-01
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Relational Algebra / Relational Operations
+- id: relational_algebra_joins
+  name: 'Relational algebra: joins and division'
+  unit: 1
+  bloom: L3
+  prereqs:
+  - relational_algebra_basic
+  item_types:
+  - mcq
+  - sql
+  demo_core: true
+  description: Theta, equi and natural join; left, right and full outer join; division.
+  misconceptions:
+  - MC-RA-02
+  - MC-JOIN-02
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Relational Algebra – Inner Join / Outer Join
+- id: sql_basic_structure
+  name: Basic structure of SQL queries
+  unit: 1
+  bloom: L3
+  prereqs:
+  - relational_algebra_basic
+  item_types:
+  - sql
+  - mcq
+  demo_core: true
+  description: SELECT–FROM–WHERE, DISTINCT, ORDER BY, LIKE, BETWEEN, IN, NULL tests.
+  misconceptions:
+  - MC-NULL-01
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: SQL Fundamentals – Select
+- id: sql_ddl
+  name: SQL DDL
+  unit: 1
+  bloom: L3
+  prereqs:
+  - integrity_constraints
+  item_types:
+  - mcq
+  - sql
+  demo_core: false
+  description: CREATE, ALTER, DROP, TRUNCATE; NOT NULL, UNIQUE, CHECK, PRIMARY KEY, FOREIGN KEY constraints.
+  misconceptions:
+  - MC-SQL-01
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Data Definition Language
+- id: sql_dml
+  name: SQL DML
+  unit: 1
+  bloom: L3
+  prereqs:
+  - sql_ddl
+  - sql_basic_structure
+  item_types:
+  - mcq
+  - sql
+  demo_core: false
+  description: INSERT, UPDATE, DELETE; DELETE vs TRUNCATE vs DROP.
+  misconceptions:
+  - MC-SQL-01
+  notes_ref:
+    file: notes/DBMS Unit 1 Notes.pdf
+    section: Data Manipulation Language
+- id: er_model
+  name: Entity–relationship model
+  unit: 2
+  bloom: L2
+  prereqs:
+  - relational_model
+  item_types:
+  - mcq
+  demo_core: false
+  description: Entities, entity sets, attribute types (simple, composite, multivalued, derived), relationships, mapping cardinality.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Introduction to Entity Relationship Model
+- id: er_diagrams
+  name: E-R diagrams
+  unit: 2
+  bloom: L3
+  prereqs:
+  - er_model
+  item_types:
+  - mcq
+  demo_core: false
+  description: Notation, participation, weak entity sets and identifying relationships, binary vs ternary, specialization/generalization.
+  misconceptions:
+  - MC-ER-01
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: ER Diagrams / Weak Entity Set
+- id: er_to_relational
+  name: ER-to-relational mapping
+  unit: 2
+  bloom: L3
+  prereqs:
+  - er_diagrams
+  - keys
+  item_types:
+  - mcq
+  demo_core: false
+  description: Mapping strong and weak entities, 1:1, 1:N and M:N relationships, multivalued attributes and generalization
+    to tables.
+  misconceptions:
+  - MC-ER-01
+  - MC-ER-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: ER to Relational Mapping
+- id: functional_dependencies
+  name: Functional dependencies
+  unit: 2
+  bloom: L3
+  prereqs:
+  - keys
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: FD definition, trivial/non-trivial, Armstrong's axioms, closure of an FD set, canonical cover, extraneous attributes.
+  misconceptions:
+  - MC-FD-01
+  - MC-FD-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Functional Dependencies
+- id: closure_candidate_keys
+  name: Attribute closure and finding candidate keys
+  unit: 2
+  bloom: L3
+  prereqs:
+  - functional_dependencies
+  item_types:
+  - fd
+  demo_core: true
+  description: Computing X+, testing superkeys, finding all candidate keys, prime vs non-prime attributes.
+  misconceptions:
+  - MC-KEY-01
+  - MC-KEY-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Computing Closure Set / Concept of Super key and Candidate Key
+- id: nonloss_decomposition
+  name: Non-loss (lossless-join) decomposition
+  unit: 2
+  bloom: L3
+  prereqs:
+  - functional_dependencies
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: 'Decomposition problems; lossless test: common attributes must be a superkey of at least one side.'
+  misconceptions:
+  - MC-DEC-01
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Non-loss Decomposition or Loss-less Join
+- id: dependency_preservation
+  name: Dependency preservation
+  unit: 2
+  bloom: L3
+  prereqs:
+  - nonloss_decomposition
+  item_types:
+  - mcq
+  - fd
+  demo_core: false
+  description: Checking whether the union of projected FDs implies the original FD set.
+  misconceptions:
+  - MC-NF-03
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Dependency Preservation
+- id: nf_1_2
+  name: First and second normal form
+  unit: 2
+  bloom: L3
+  prereqs:
+  - closure_candidate_keys
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: Atomic values; partial dependency of non-prime attributes on part of a candidate key.
+  misconceptions:
+  - MC-NF-02
+  - MC-NF-04
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Normal Forms – First / Second Normal Form
+- id: nf_3
+  name: Third normal form
+  unit: 2
+  bloom: L3
+  prereqs:
+  - nf_1_2
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: Transitive dependencies; for X→A either X is a superkey or A is prime.
+  misconceptions:
+  - MC-NF-01
+  - MC-NF-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Third Normal Form
+- id: bcnf
+  name: Boyce–Codd normal form
+  unit: 2
+  bloom: L3
+  prereqs:
+  - nf_3
+  - dependency_preservation
+  item_types:
+  - mcq
+  - fd
+  demo_core: true
+  description: Every non-trivial FD has a superkey on the left; BCNF decomposition may lose dependency preservation.
+  misconceptions:
+  - MC-NF-01
+  - MC-NF-03
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Boyce / Codd Normal Form (BCNF)
+- id: mvd_4nf
+  name: Multivalued dependencies and 4NF
+  unit: 2
+  bloom: L3
+  prereqs:
+  - bcnf
+  item_types:
+  - mcq
+  demo_core: false
+  description: MVD X↠Y, independence of multivalued facts, 4NF decomposition.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Multivalued Dependencies and Fourth Normal Form
+- id: jd_5nf
+  name: Join dependencies and 5NF
+  unit: 2
+  bloom: L3
+  prereqs:
+  - mvd_4nf
+  - nonloss_decomposition
+  item_types:
+  - mcq
+  demo_core: false
+  description: Join dependency, project-join normal form.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Join Dependencies and Fifth Normal Form
+- id: sql_set_operations
+  name: SQL set operations
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_basic_structure
+  - relational_algebra_basic
+  item_types:
+  - sql
+  - mcq
+  demo_core: false
+  description: UNION, UNION ALL, INTERSECT, EXCEPT/MINUS; union compatibility; duplicate handling.
+  misconceptions:
+  - MC-SET-01
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: SQL Set Operation
+- id: sql_aggregates
+  name: SQL aggregate functions
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_basic_structure
+  item_types:
+  - sql
+  - mcq
+  demo_core: true
+  description: COUNT, SUM, AVG, MIN, MAX; COUNT(*) vs COUNT(col); NULL handling.
+  misconceptions:
+  - MC-NULL-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Aggregate Functions
+- id: sql_group_by_having
+  name: GROUP BY and HAVING
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_aggregates
+  item_types:
+  - sql
+  - mcq
+  demo_core: true
+  description: Grouping rules, filtering groups with HAVING vs rows with WHERE, order of evaluation.
+  misconceptions:
+  - MC-AGG-01
+  - MC-AGG-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Group By / Having
+- id: sql_joins
+  name: SQL joins
+  unit: 2
+  bloom: L3
+  prereqs:
+  - relational_algebra_joins
+  - sql_basic_structure
+  item_types:
+  - sql
+  - mcq
+  demo_core: true
+  description: INNER, LEFT, RIGHT, FULL OUTER, CROSS and self joins; ON vs WHERE.
+  misconceptions:
+  - MC-RA-02
+  - MC-JOIN-01
+  - MC-JOIN-02
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Joins
+- id: sql_subqueries
+  name: SQL subqueries
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_aggregates
+  - sql_basic_structure
+  item_types:
+  - sql
+  - mcq
+  demo_core: true
+  description: Single-row, multi-row (IN, ANY, ALL), EXISTS, correlated subqueries.
+  misconceptions:
+  - MC-NULL-03
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Sub Queries
+- id: sql_views
+  name: SQL views
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_joins
+  item_types:
+  - sql
+  - mcq
+  demo_core: false
+  description: CREATE/REPLACE/DROP VIEW, updatable views, views vs tables.
+  misconceptions:
+  - MC-VIEW-01
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Views
+- id: sql_triggers
+  name: SQL triggers
+  unit: 2
+  bloom: L3
+  prereqs:
+  - sql_dml
+  item_types:
+  - mcq
+  demo_core: false
+  description: BEFORE/AFTER, row vs statement level triggers on INSERT/UPDATE/DELETE.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 2 Notes.pdf
+    section: Triggers
+- id: transaction_concepts
+  name: Transaction concepts
+  unit: 3
+  bloom: L2
+  prereqs:
+  - sql_dml
+  item_types:
+  - mcq
+  demo_core: false
+  description: Transactions, read/write operations, transaction states.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.1 Transaction Concepts
+- id: acid
+  name: ACID properties
+  unit: 3
+  bloom: L2
+  prereqs:
+  - transaction_concepts
+  item_types:
+  - mcq
+  demo_core: false
+  description: Atomicity, consistency, isolation, durability and which component ensures each.
+  misconceptions:
+  - MC-TX-03
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.2 ACID Properties
+- id: schedules
+  name: Schedules
+  unit: 3
+  bloom: L3
+  prereqs:
+  - transaction_concepts
+  item_types:
+  - mcq
+  - schedule
+  demo_core: true
+  description: Serial vs concurrent schedules; recoverable, cascadeless and strict schedules.
+  misconceptions:
+  - MC-TX-04
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.3 Schedules
+- id: serializability
+  name: Serializability
+  unit: 3
+  bloom: L3
+  prereqs:
+  - schedules
+  item_types:
+  - mcq
+  - schedule
+  demo_core: true
+  description: Conflicting operations, conflict serializability via precedence graph, view serializability, blind writes.
+  misconceptions:
+  - MC-TX-02
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.4 Serializability
+- id: concurrency_problems
+  name: Need for concurrency control
+  unit: 3
+  bloom: L2
+  prereqs:
+  - schedules
+  item_types:
+  - mcq
+  demo_core: false
+  description: Lost update, dirty read, unrepeatable read, phantom problems.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.5 Concurrency Control
+- id: locking_protocols
+  name: Locking protocols
+  unit: 3
+  bloom: L3
+  prereqs:
+  - concurrency_problems
+  item_types:
+  - mcq
+  demo_core: false
+  description: Shared and exclusive locks, lock compatibility matrix, lock upgrade/downgrade.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.6 Locking Protocols
+- id: two_phase_locking
+  name: Two-phase locking
+  unit: 3
+  bloom: L3
+  prereqs:
+  - locking_protocols
+  - serializability
+  item_types:
+  - mcq
+  - schedule
+  demo_core: true
+  description: Growing and shrinking phases; basic, strict and rigorous 2PL; guarantees conflict serializability.
+  misconceptions:
+  - MC-TX-01
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.7 Two Phase Locking
+- id: deadlock
+  name: Deadlock handling
+  unit: 3
+  bloom: L3
+  prereqs:
+  - two_phase_locking
+  item_types:
+  - mcq
+  - schedule
+  demo_core: true
+  description: Wait-die, wound-wait, timeouts, wait-for graph detection, victim selection, livelock.
+  misconceptions:
+  - MC-TX-01
+  - MC-TX-05
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.8 Deadlock
+- id: isolation_levels
+  name: Isolation levels
+  unit: 3
+  bloom: L2
+  prereqs:
+  - concurrency_problems
+  item_types:
+  - mcq
+  demo_core: true
+  description: Read uncommitted, read committed, repeatable read, serializable and the anomalies each allows.
+  misconceptions:
+  - MC-ISO-01
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.11 Isolation Levels
+- id: dcl_tcl
+  name: SQL DCL and TCL commands
+  unit: 3
+  bloom: L3
+  prereqs:
+  - sql_dml
+  - transaction_concepts
+  item_types:
+  - mcq
+  demo_core: false
+  description: GRANT, REVOKE; COMMIT, ROLLBACK, SAVEPOINT, SET TRANSACTION.
+  misconceptions:
+  - MC-TCL-01
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.12 SQL Facilities for Concurrency and Recovery
+- id: savepoints
+  name: Savepoints
+  unit: 3
+  bloom: L2
+  prereqs:
+  - dcl_tcl
+  item_types:
+  - mcq
+  demo_core: false
+  description: SAVEPOINT, ROLLBACK TO SAVEPOINT, RELEASE SAVEPOINT.
+  misconceptions:
+  - MC-TCL-01
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.10 Save Points
+- id: transaction_recovery
+  name: Transaction recovery
+  unit: 3
+  bloom: L2
+  prereqs:
+  - acid
+  item_types:
+  - mcq
+  demo_core: false
+  description: Failure classification, log-based recovery (deferred/immediate), undo/redo, checkpoints, shadow paging.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: 3.9 Transaction Recovery / Log-based Recovery
+- id: backup_recovery
+  name: Backup and recovery systems
+  unit: 3
+  bloom: L2
+  prereqs:
+  - transaction_recovery
+  item_types:
+  - mcq
+  demo_core: false
+  description: Full, incremental and differential backups; stable storage; disk failure recovery.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 3 Notes.pdf
+    section: Crash Recovery / Storage Structure
+- id: raid
+  name: RAID
+  unit: 4
+  bloom: L2
+  prereqs: []
+  item_types:
+  - mcq
+  demo_core: false
+  description: 'RAID 0–6: striping, mirroring, parity; performance and reliability trade-offs.'
+  misconceptions:
+  - MC-RAID-01
+  - MC-RAID-02
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: RAID Levels
+- id: file_organization
+  name: File organization and record organization
+  unit: 4
+  bloom: L2
+  prereqs: []
+  item_types:
+  - mcq
+  demo_core: false
+  description: Fixed vs variable-length records, heap, sequential, hashing and multitable clustering file organization.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: File Organization / Organization of Records in Files
+- id: ordered_indices
+  name: Ordered indices
+  unit: 4
+  bloom: L2
+  prereqs:
+  - file_organization
+  - keys
+  item_types:
+  - mcq
+  demo_core: true
+  description: Primary/clustering vs secondary indices, dense vs sparse, single vs multilevel indices.
+  misconceptions:
+  - MC-IDX-01
+  - MC-IDX-02
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: Ordered Indices
+- id: b_plus_tree
+  name: B+ tree index files
+  unit: 4
+  bloom: L3
+  prereqs:
+  - ordered_indices
+  item_types:
+  - mcq
+  demo_core: true
+  description: Node structure, fan-out, insertion with splits, deletion with merges, linked leaves for range queries.
+  misconceptions:
+  - MC-IDX-03
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: B+ Tree – Insertion / Deletion / Search
+- id: b_tree
+  name: B tree index files
+  unit: 4
+  bloom: L3
+  prereqs:
+  - b_plus_tree
+  item_types:
+  - mcq
+  demo_core: false
+  description: B-tree structure and operations; comparison with B+ tree.
+  misconceptions:
+  - MC-IDX-03
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: B Tree Index Files
+- id: static_hashing
+  name: Static hashing
+  unit: 4
+  bloom: L2
+  prereqs:
+  - file_organization
+  item_types:
+  - mcq
+  demo_core: false
+  description: Hash functions, buckets, bucket overflow, overflow chaining, open hashing.
+  misconceptions:
+  - MC-HASH-01
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: Static Hashing / Open Hashing
+- id: dynamic_hashing
+  name: Dynamic (extendible) hashing
+  unit: 4
+  bloom: L2
+  prereqs:
+  - static_hashing
+  item_types:
+  - mcq
+  demo_core: false
+  description: Global and local depth, bucket split, directory doubling; static vs dynamic hashing.
+  misconceptions:
+  - MC-HASH-01
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: Dynamic Hashing / Extendible Hashing
+- id: query_processing
+  name: Query processing overview
+  unit: 4
+  bloom: L2
+  prereqs:
+  - relational_algebra_joins
+  - ordered_indices
+  item_types:
+  - mcq
+  demo_core: false
+  description: Parsing and translation, optimization, evaluation; cost measures; selection, sorting and join algorithms.
+  misconceptions:
+  - MC-QO-01
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: Query Processing Overview
+- id: query_optimization
+  name: Query optimization (heuristics and cost estimation)
+  unit: 4
+  bloom: L3
+  prereqs:
+  - query_processing
+  item_types:
+  - mcq
+  demo_core: false
+  description: Equivalence rules, push selections/projections down, join ordering, cost-based plan selection.
+  misconceptions:
+  - MC-IDX-01
+  - MC-QO-01
+  notes_ref:
+    file: notes/DBMS Unit 4 Notes.pdf
+    section: Query Optimization
+- id: distributed_db_architecture
+  name: Distributed database architecture
+  unit: 5
+  bloom: L2
+  prereqs:
+  - db_architecture
+  item_types:
+  - mcq
+  demo_core: false
+  description: Data replication (full/partial), horizontal and vertical fragmentation, transparency.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Architecture / Data Storage
+- id: distributed_db_types
+  name: Types of distributed databases
+  unit: 5
+  bloom: L2
+  prereqs:
+  - distributed_db_architecture
+  item_types:
+  - mcq
+  demo_core: false
+  description: Homogeneous vs heterogeneous distributed databases; distributed vs centralized DBMS.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Types of Distributed Databases
+- id: distributed_transactions
+  name: Distributed transaction processing
+  unit: 5
+  bloom: L2
+  prereqs:
+  - distributed_db_architecture
+  - acid
+  item_types:
+  - mcq
+  demo_core: false
+  description: Transaction coordinator/manager, failure modes, two-phase and three-phase commit.
+  misconceptions:
+  - MC-DIST-01
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Transaction Processing / Commit Protocols
+- id: nosql_intro
+  name: Introduction to NoSQL
+  unit: 5
+  bloom: L2
+  prereqs:
+  - data_models
+  item_types:
+  - mcq
+  demo_core: false
+  description: Features of NoSQL, schema flexibility, horizontal scaling, BASE vs ACID.
+  misconceptions:
+  - MC-NOSQL-01
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: NoSQL – Introduction / Comparison between RDBMS and NoSQL
+- id: cap_theorem
+  name: CAP theorem
+  unit: 5
+  bloom: L2
+  prereqs:
+  - nosql_intro
+  - distributed_db_architecture
+  item_types:
+  - mcq
+  demo_core: true
+  description: Consistency, availability, partition tolerance; CP vs AP choices under partition.
+  misconceptions:
+  - MC-CAP-01
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: CAP Theorem
+- id: nosql_types
+  name: Types of NoSQL databases
+  unit: 5
+  bloom: L2
+  prereqs:
+  - nosql_intro
+  item_types:
+  - mcq
+  demo_core: true
+  description: Key-value, document, column-family and graph databases with use cases.
+  misconceptions:
+  - MC-NOSQL-01
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Types of NoSQL Database
+- id: db_security_issues
+  name: Database security issues
+  unit: 5
+  bloom: L2
+  prereqs: []
+  item_types:
+  - mcq
+  demo_core: false
+  description: Threats, control measures (access, inference, flow control, encryption), DBA responsibilities.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Database Security / Security Issues
+- id: access_control
+  name: Privilege-based and role-based access control
+  unit: 5
+  bloom: L2
+  prereqs:
+  - db_security_issues
+  - dcl_tcl
+  item_types:
+  - mcq
+  demo_core: false
+  description: Discretionary access control with GRANT/REVOKE, grant option, RBAC.
+  misconceptions:
+  - MC-SEC-02
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Access Control Based on Privileges / Role Based Access Control
+- id: sql_injection
+  name: SQL injection
+  unit: 5
+  bloom: L2
+  prereqs:
+  - db_security_issues
+  - sql_basic_structure
+  item_types:
+  - mcq
+  - sql
+  demo_core: false
+  description: How injection works, examples, prevention with parameterized queries and least privilege.
+  misconceptions:
+  - MC-SEC-01
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: SQL Injection
+- id: encryption_pki
+  name: Encryption and public key infrastructure
+  unit: 5
+  bloom: L2
+  prereqs:
+  - db_security_issues
+  item_types:
+  - mcq
+  demo_core: false
+  description: Symmetric vs public-key encryption, digital signatures, certificates; security challenges.
+  misconceptions: []
+  notes_ref:
+    file: notes/DBMS Unit 5 Notes.pdf
+    section: Encryption and Public Key Infrastructures
