@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+# runtime data (rebuilt by scripts)
+data/app.db
+data/app.db-*
+# course materials stay local (copyright); the notes index is rebuilt from them
+notes/*
+!notes/README.md
+textbooks/
+syllabus/
+question_banks/
+data/notes_index.json

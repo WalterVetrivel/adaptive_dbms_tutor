@@ -1,0 +1,240 @@
+# Seed misconception library, linked to concept ids in concept_graph.yaml
+misconceptions:
+- id: MC-ARCH-01
+  belief: Logical and physical data independence are the same thing.
+  concepts:
+  - views_of_data
+  remediation: Physical independence = change storage without changing the logical schema; logical = change logical schema
+    without changing views.
+- id: MC-KEY-01
+  belief: Every superkey is a candidate key (ignores minimality).
+  concepts:
+  - keys
+  - closure_candidate_keys
+  remediation: 'A candidate key is a minimal superkey: remove any attribute and it stops being a superkey.'
+- id: MC-KEY-02
+  belief: A relation can have only one candidate key.
+  concepts:
+  - keys
+  - closure_candidate_keys
+  remediation: There can be several candidate keys; one is chosen as the primary key.
+- id: MC-KEY-03
+  belief: A foreign key can never be NULL and must reference only a primary key.
+  concepts:
+  - integrity_constraints
+  remediation: A foreign key may be NULL (unless NOT NULL is declared) and may reference any candidate/UNIQUE key.
+- id: MC-RA-01
+  belief: Projection (π) keeps duplicate tuples in relational algebra.
+  concepts:
+  - relational_algebra_basic
+  remediation: Relations are sets; π removes duplicates (unlike SQL SELECT without DISTINCT).
+- id: MC-RA-02
+  belief: Natural join and Cartesian product give the same result.
+  concepts:
+  - relational_algebra_joins
+  - sql_joins
+  remediation: Natural join keeps only tuples that agree on common attributes and removes the duplicate column.
+- id: MC-SQL-01
+  belief: DELETE, TRUNCATE and DROP do the same thing.
+  concepts:
+  - sql_dml
+  - sql_ddl
+  remediation: DELETE removes rows (DML, can use WHERE, can roll back); TRUNCATE removes all rows (DDL); DROP removes the
+    table itself.
+- id: MC-NULL-01
+  belief: NULL = NULL evaluates to TRUE.
+  concepts:
+  - sql_basic_structure
+  remediation: Comparisons with NULL give UNKNOWN; use IS NULL / IS NOT NULL.
+- id: MC-NULL-02
+  belief: COUNT(column) counts NULL values, the same as COUNT(*).
+  concepts:
+  - sql_aggregates
+  remediation: COUNT(col) skips NULLs; COUNT(*) counts rows.
+- id: MC-NULL-03
+  belief: NOT IN behaves normally when the subquery returns a NULL.
+  concepts:
+  - sql_subqueries
+  remediation: x NOT IN (…, NULL) is never TRUE, so the query returns no rows; use NOT EXISTS.
+- id: MC-AGG-01
+  belief: WHERE can filter on aggregate results.
+  concepts:
+  - sql_group_by_having
+  remediation: WHERE filters rows before grouping; use HAVING to filter groups after aggregation.
+- id: MC-AGG-02
+  belief: Non-aggregated columns can appear in SELECT without being in GROUP BY.
+  concepts:
+  - sql_group_by_having
+  remediation: Every selected non-aggregated column must be in GROUP BY (or functionally determined by it).
+- id: MC-JOIN-01
+  belief: A WHERE condition on the right table keeps LEFT JOIN's unmatched rows.
+  concepts:
+  - sql_joins
+  remediation: Unmatched rows have NULLs on the right, so the WHERE condition removes them; put the condition in ON.
+- id: MC-JOIN-02
+  belief: A join without a join condition returns only matching rows.
+  concepts:
+  - sql_joins
+  - relational_algebra_joins
+  remediation: No condition = Cartesian product (every pair of rows).
+- id: MC-SET-01
+  belief: UNION keeps duplicate rows.
+  concepts:
+  - sql_set_operations
+  remediation: UNION removes duplicates; UNION ALL keeps them.
+- id: MC-VIEW-01
+  belief: A view stores its own copy of the data.
+  concepts:
+  - sql_views
+  remediation: A (non-materialized) view is a stored query evaluated when used.
+- id: MC-ER-01
+  belief: A weak entity set has its own primary key.
+  concepts:
+  - er_diagrams
+  - er_to_relational
+  remediation: A weak entity has only a partial key (discriminator); its key = owner's key + discriminator.
+- id: MC-ER-02
+  belief: An M:N relationship can be mapped by adding a foreign key to one of the entity tables.
+  concepts:
+  - er_to_relational
+  remediation: M:N needs a separate relation whose key combines both entity keys.
+- id: MC-FD-01
+  belief: If A → B then B → A (FDs are symmetric).
+  concepts:
+  - functional_dependencies
+  remediation: FDs are one-directional; A → B says nothing about B → A.
+- id: MC-FD-02
+  belief: If AB → C then A → C (the left side can be split).
+  concepts:
+  - functional_dependencies
+  remediation: Only the right side can be split (decomposition rule); the left side cannot.
+- id: MC-DEC-01
+  belief: Any decomposition that shares a common attribute is lossless.
+  concepts:
+  - nonloss_decomposition
+  remediation: The common attributes must be a superkey of at least one of the decomposed relations.
+- id: MC-NF-01
+  belief: 3NF and BCNF are the same thing.
+  concepts:
+  - bcnf
+  - nf_3
+  remediation: 3NF allows X → A when A is prime; BCNF requires X to be a superkey for every non-trivial FD.
+- id: MC-NF-02
+  belief: 2NF removes transitive dependencies (mixes up 2NF and 3NF).
+  concepts:
+  - nf_1_2
+  - nf_3
+  remediation: 2NF removes partial dependencies on part of a key; 3NF removes transitive dependencies.
+- id: MC-NF-03
+  belief: A BCNF decomposition always preserves dependencies.
+  concepts:
+  - bcnf
+  - dependency_preservation
+  remediation: BCNF decomposition is always lossless but may not preserve all dependencies; 3NF synthesis always can.
+- id: MC-NF-04
+  belief: A relation with a single-attribute key can still violate 2NF.
+  concepts:
+  - nf_1_2
+  remediation: Partial dependency needs a composite key; with only simple candidate keys a 1NF relation is in 2NF.
+- id: MC-TX-01
+  belief: Two-phase locking prevents deadlocks.
+  concepts:
+  - two_phase_locking
+  - deadlock
+  remediation: 2PL guarantees conflict serializability but deadlocks can still occur.
+- id: MC-TX-02
+  belief: Every view-serializable schedule is conflict-serializable.
+  concepts:
+  - serializability
+  remediation: 'The reverse is true: conflict-serializable ⊂ view-serializable (blind writes make the difference).'
+- id: MC-TX-03
+  belief: Consistency in ACID is guaranteed by the DBMS alone.
+  concepts:
+  - acid
+  remediation: Consistency is the programmer's responsibility for each transaction; the DBMS ensures A, I and D.
+- id: MC-TX-04
+  belief: A recoverable schedule is always cascadeless.
+  concepts:
+  - schedules
+  remediation: Recoverable only orders commits; cascadeless also forbids reading uncommitted data.
+- id: MC-TX-05
+  belief: Wait-die and wound-wait are the same / have the roles swapped.
+  concepts:
+  - deadlock
+  remediation: 'Wait-die: older waits, younger dies. Wound-wait: older wounds (preempts) younger, younger waits.'
+- id: MC-ISO-01
+  belief: READ COMMITTED prevents non-repeatable reads.
+  concepts:
+  - isolation_levels
+  remediation: READ COMMITTED prevents dirty reads only; REPEATABLE READ prevents non-repeatable reads.
+- id: MC-TCL-01
+  belief: Creating a SAVEPOINT commits the work done so far.
+  concepts:
+  - savepoints
+  - dcl_tcl
+  remediation: A savepoint is a marker inside the transaction; only COMMIT makes work permanent.
+- id: MC-RAID-01
+  belief: RAID is a substitute for backups.
+  concepts:
+  - raid
+  remediation: RAID protects against disk failure, not against deletion, corruption or disasters.
+- id: MC-RAID-02
+  belief: RAID 0 provides redundancy.
+  concepts:
+  - raid
+  remediation: RAID 0 is striping only; one disk failure loses data.
+- id: MC-IDX-01
+  belief: Adding an index always makes queries faster.
+  concepts:
+  - ordered_indices
+  - query_optimization
+  remediation: Indexes speed some reads but slow writes and may not be used for low-selectivity predicates.
+- id: MC-IDX-02
+  belief: A secondary index can be sparse.
+  concepts:
+  - ordered_indices
+  remediation: Secondary indices must be dense because the file is not sorted on that key.
+- id: MC-IDX-03
+  belief: B+ tree internal nodes store data records / record pointers.
+  concepts:
+  - b_plus_tree
+  - b_tree
+  remediation: In a B+ tree, only leaves point to records; internal nodes hold keys for navigation (unlike a B tree).
+- id: MC-HASH-01
+  belief: Static hashing handles database growth without overflow problems.
+  concepts:
+  - static_hashing
+  - dynamic_hashing
+  remediation: Static hashing has a fixed number of buckets, so growth causes overflow chains; dynamic hashing splits buckets.
+- id: MC-QO-01
+  belief: The optimizer executes the query in the order it is written.
+  concepts:
+  - query_processing
+  - query_optimization
+  remediation: SQL is declarative; the optimizer rewrites to equivalent plans (e.g., pushes selections down).
+- id: MC-DIST-01
+  belief: Two-phase commit never blocks.
+  concepts:
+  - distributed_transactions
+  remediation: 2PC can block if the coordinator fails after prepare; 3PC reduces blocking.
+- id: MC-CAP-01
+  belief: A distributed system can guarantee consistency, availability and partition tolerance at the same time.
+  concepts:
+  - cap_theorem
+  remediation: During a network partition, a system must choose between consistency and availability.
+- id: MC-NOSQL-01
+  belief: NoSQL means the database cannot use SQL or any schema at all.
+  concepts:
+  - nosql_intro
+  - nosql_types
+  remediation: NoSQL = 'not only SQL'; many stores have query languages and flexible (not absent) schemas.
+- id: MC-SEC-01
+  belief: Escaping quotes in input fully prevents SQL injection.
+  concepts:
+  - sql_injection
+  remediation: Use parameterized queries / prepared statements and least privilege; escaping alone is error-prone.
+- id: MC-SEC-02
+  belief: Revoking a privilege never affects users who received it from the revoked user.
+  concepts:
+  - access_control
+  remediation: With REVOKE … CASCADE, privileges granted onward via GRANT OPTION are also revoked.
