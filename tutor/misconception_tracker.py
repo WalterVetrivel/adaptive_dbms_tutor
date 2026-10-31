@@ -9,6 +9,7 @@ from .clock import iso
 
 ACTIVE_CONFIDENCE = 0.7
 ACTIVE_OCCURRENCES = 2
+REPEAT_MIN_CONFIDENCE = 0.5   # weak evidence (e.g. a wrong answer on a targeting item) never activates alone
 RESOLVE_AFTER_CORRECT = 2
 
 
@@ -22,7 +23,8 @@ def record_evidence(conn: sqlite3.Connection, student_id: str, mc_id: str, confi
         evidence = json.loads(row["evidence_json"]) + ([response_id] if response_id else [])
     else:
         occ, conf, evidence = 1, confidence, [response_id] if response_id else []
-    status = "active" if conf >= ACTIVE_CONFIDENCE or occ >= ACTIVE_OCCURRENCES else "suspected"
+    status = "active" if conf >= ACTIVE_CONFIDENCE or (occ >= ACTIVE_OCCURRENCES and conf >= REPEAT_MIN_CONFIDENCE) \
+        else "suspected"
     conn.execute(
         """INSERT INTO student_misconceptions(student_id, misconception_id, status, confidence, occurrences,
                correct_since, evidence_json, updated_at) VALUES (?,?,?,?,?,0,?,?)
