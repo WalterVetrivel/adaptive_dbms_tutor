@@ -1,7 +1,7 @@
 """QueryMind: adaptive DBMS exam-prep tutor (Streamlit entry point / home page)."""
 import streamlit as st
 
-from tutor import config, item_bank, ui
+from tutor import bootstrap, config, item_bank, ui
 from tutor.viz import to_dot
 
 st.set_page_config(page_title="QueryMind – DBMS Tutor", page_icon="🗄️", layout="wide")
@@ -27,6 +27,15 @@ m5.metric("Notes chunks indexed", len(notes))
 
 if config.OFFLINE_MODE:
     st.info("Running in **offline mode** (no `GROQ_API_KEY`): misconception diagnosis uses rules only.")
+
+with st.expander("🎬 Demo controls"):
+    st.caption(f"Resets {bootstrap.DEMO_STUDENT[0]}'s progress and the demo clock. The simulated class is kept.")
+    if st.button("Reset demo"):
+        bootstrap.reset_demo(conn)
+        for k in [k for k in st.session_state if k.startswith(("diag", "practice"))]:
+            del st.session_state[k]
+        st.session_state["student_id"] = bootstrap.DEMO_STUDENT[1]
+        st.success("Demo reset.")
 
 st.subheader("Course concept map")
 col_a, col_b = st.columns([1, 3])
