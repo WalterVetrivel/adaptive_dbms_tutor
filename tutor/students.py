@@ -30,7 +30,8 @@ def get(conn: sqlite3.Connection, student_id: str) -> sqlite3.Row | None:
 
 
 def reset_progress(conn: sqlite3.Connection, student_id: str) -> None:
-    for table in ("mastery", "mastery_events", "review_cards", "student_misconceptions"):
+    for table in ("mastery", "mastery_events", "review_cards", "student_misconceptions", "onboarding",
+                  "study_plan"):
         conn.execute(f"DELETE FROM {table} WHERE student_id=?", (student_id,))
     conn.execute("DELETE FROM diagnoses WHERE response_id IN (SELECT id FROM responses WHERE student_id=?)",
                  (student_id,))

@@ -5,7 +5,8 @@ import time
 
 import streamlit as st
 
-from . import calibration, clock, config, item_bank, learner_model, misconception_tracker, sql_sandbox, students
+from . import (calibration, clock, config, item_bank, learner_model, misconception_tracker, onboarding, sql_sandbox,
+               students)
 from .agents.analyst import make_analyst
 from .agents.explainer import Explanation, explain
 from .db import init_db
@@ -17,6 +18,9 @@ from .schemas import Item
 from .viz import to_dot
 
 from .bootstrap import DEMO_STUDENT, ensure_all
+
+
+GET_STARTED = "pages/0_🧭_Get_started.py"
 
 
 @st.cache_resource(show_spinner="Setting up QueryMind (first run builds the demo class)…")
@@ -41,13 +45,15 @@ def sidebar() -> str:
                            format_func=names.get, label_visibility="collapsed")
         if sid != st.session_state.get("student_id"):
             st.session_state["student_id"] = sid
-            for k in [k for k in st.session_state if k.startswith(("diag", "practice"))]:
+            for k in [k for k in st.session_state if k.startswith(("diag", "practice", "onb"))]:
                 del st.session_state[k]
         with st.popover("➕ New student"):
             name = st.text_input("Name")
             if st.button("Create", disabled=not name.strip()):
                 st.session_state["student_id"] = students.create(conn, name.strip())
-                st.rerun()
+                for k in [k for k in st.session_state if k.startswith(("diag", "practice", "onb"))]:
+                    del st.session_state[k]
+                st.switch_page(GET_STARTED)
         st.divider()
         off = clock.offset_days(conn)
         st.caption(f"🕒 {clock.now(conn):%d %b %Y}" + (f" (demo clock +{off:g} days)" if off else ""))
@@ -142,7 +148,7 @@ def question_card(item: Item, graph: ConceptGraph, key: str) -> tuple[str, str, 
 
 
 def answer(item: Item, student_id: str, answer_text: str, reasoning: str, mode: str,
-           elapsed_ms: int | None) -> tuple[AnswerOutcome, Explanation]:
+           elapsed_ms: int | None, explain_mistakes: bool = True) -> tuple[AnswerOutcome, Explanation | None]:
     conn, graph, notes, llm = services()
     analyst = make_analyst(llm, graph) if llm else None
     errors: list[Exception] = []
@@ -150,7 +156,7 @@ def answer(item: Item, student_id: str, answer_text: str, reasoning: str, mode: 
                             analyst=analyst, on_error=errors.append)
     if errors:
         st.toast("Groq unavailable, used rule-based diagnosis", icon="⚠️")
-    exp = explain(llm, graph, notes, item, answer_text, reasoning, outcome) if (
+    exp = explain(llm, graph, notes, item, answer_text, reasoning, outcome) if explain_mistakes and (
         not outcome.grade.correct or outcome.diagnosis.flawed_reasoning) else None
     return outcome, exp
 
@@ -206,3 +212,27 @@ def active_misconceptions(student_id: str):
         icon = "🔴" if r["status"] == "active" else "🟡"
         st.markdown(f"{icon} **{graph.misconceptions[r['misconception_id']].belief}** "
                     f"· {r['status']} · seen {r['occurrences']}×")
+
+
+def study_plan(student_id: str, limit: int | None = None):
+    """The student's study plan as a checklist, with live mastery. Shows a call to action if there is none."""
+    conn, graph, _, _ = services()
+    steps = onboarding.plan(conn, student_id)
+    if not steps:
+        if onboarding.status(conn, student_id) == "completed":
+            st.caption("Nothing to fix: you aced the placement check. Practice keeps you sharp.")
+        else:
+            st.page_link(GET_STARTED, label="Take the 10-question placement check to get your study plan",
+                         icon="🧭")
+        return
+    done = sum(s.done for s in steps)
+    st.progress(done / len(steps), text=f"{done} of {len(steps)} topics mastered")
+    nxt = next((s for s in steps if not s.done), None)
+    for s in steps[:limit]:
+        c = graph.concepts[s.concept_id]
+        mark = "✅" if s.done else ("▶️" if s is nxt else "⬜")
+        level = f"{s.mastery:.0%}" if s.attempted else "not practised yet"
+        st.markdown(f"{mark} **{c.name}** · Unit {c.unit} · {level}  \n"
+                    f"<span style='opacity:0.7;font-size:0.9em'>{s.reason}</span>", unsafe_allow_html=True)
+    if limit and len(steps) > limit:
+        st.caption(f"…and {len(steps) - limit} more")

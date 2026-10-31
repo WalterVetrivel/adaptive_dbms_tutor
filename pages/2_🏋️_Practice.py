@@ -9,7 +9,7 @@ sid = ui.sidebar()
 now = clock.now(conn)
 
 st.title("🏋️ Today's practice")
-REASON = {"review due": "🔁 Review due", "weak concept": "🎯 Weak concept",
+REASON = {"review due": "🔁 Review due", "study plan": "📋 Study plan", "weak concept": "🎯 Weak concept",
           "misconception": "🧠 Fixing a misconception", "new": "✨ New concept"}
 
 c1, c2, c3, c4 = st.columns(4)

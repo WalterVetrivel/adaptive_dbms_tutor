@@ -73,14 +73,16 @@ def pick_item(conn: sqlite3.Connection, student_id: str, concept_id: str, exclud
 @dataclass
 class QueueEntry:
     concept_id: str
-    reason: str                    # "review due" / "weak concept" / "misconception" / "new"
+    reason: str                    # "review due" / "study plan" / "weak concept" / "misconception" / "new"
     misconception: str | None = None
 
 
 def practice_queue(conn: sqlite3.Connection, graph: ConceptGraph, student_id: str, now: datetime,
                    size: int = 10) -> list[QueueEntry]:
-    """~40% due reviews, ~40% weakest concepts, ~20% active misconceptions; topped up with
-    unassessed demo-core concepts."""
+    """~20% active misconceptions, ~40% due reviews, next open study-plan steps, ~40% weakest concepts;
+    topped up with unassessed demo-core concepts."""
+    from .onboarding import open_steps
+
     available = concepts_with_items(conn)
     queue: list[QueueEntry] = []
     used: set[str] = set()
@@ -98,6 +100,8 @@ def practice_queue(conn: sqlite3.Connection, graph: ConceptGraph, student_id: st
                 break
     for cid in scheduler.due(conn, student_id, now)[: round(size * 0.4)]:
         add(QueueEntry(cid, "review due"))
+    for cid in open_steps(conn, student_id)[: round(size * 0.3)]:
+        add(QueueEntry(cid, "study plan"))
     attempted = learner_model.get_all(conn, student_id, attempted_only=True)
     for cid, _p in sorted(attempted.items(), key=lambda kv: kv[1]):
         if len([q for q in queue if q.reason == "weak concept"]) >= round(size * 0.4):
